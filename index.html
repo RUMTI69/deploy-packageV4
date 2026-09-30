@@ -191,6 +191,8 @@
   .stat-card .label{font-size:14.5px;color:var(--brown-soft);font-weight:500;}
   .stat-card .value{font-size:26.5px;font-weight:700;color:var(--flame);margin-top:6px;font-family:'Kanit',sans-serif;}
   .stat-card .value.green{color:var(--green);}
+  .stat-card .value.orange-dark{color:#E65100;}
+  .stat-card .value.orange-light{color:#FFB74D;}
   .stat-card .sub{font-size:13px;color:var(--brown-soft);margin-top:4px;}
 
   .panel{background:var(--white);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);margin-bottom:22px;overflow:hidden;}
@@ -394,6 +396,9 @@
 
   /* ---------- INCOME GRID (ตารางกรอกข้อมูลรายรับ/รายจ่าย งปม.รายได้ ตามไฟล์ต้นฉบับ) ---------- */
   .grid-controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;}
+  .page-action-bar{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .page-action-bar .btn-export,.page-action-bar .btn-datasource{border:2px solid #1B5E20;color:#1B5E20;box-shadow:0 1px 3px rgba(27,94,32,0.25);}
+  .page-action-bar .btn-export:hover,.page-action-bar .btn-datasource:hover{background:var(--green-bg);}
   .grid-controls .field{min-width:170px;margin-bottom:0;}
   .grid-hint{font-size:14px;color:var(--brown-soft);background:var(--amber-bg);border-radius:8px;padding:9px 12px;margin-bottom:14px;line-height:1.6;}
 
@@ -549,12 +554,6 @@
     pointer-events:none;line-height:1;
     font-family:'Kanit',sans-serif;
   }
-  /* ช่องที่พิมพ์สูตรแล้วยังไม่ถูกต้อง (พิมพ์ผิด/ไม่ครบ) — ไฮไลต์แดงแทนการล้างทิ้ง ให้ผู้ใช้เห็นและแก้ไขเองได้ */
-  table.income-grid input.formula-error{
-    background:var(--red-bg) !important;
-    color:var(--red) !important;
-    border-color:var(--red) !important;
-  }
   table.income-grid tr.grand-total td{background:var(--cream-deep);font-weight:700;color:var(--flame);}
   table.income-grid tr.grand-total td.total-cell{background:var(--flame);color:#fff;}
   table.expense-grid td.plan-cell{background:#FFFBF0;}
@@ -632,14 +631,6 @@
     border:1.5px solid #9E9E9E;
   }
   body[data-page="expense"] table.expense-grid td.plan-cell input{width:118px;}
-  /* ให้ช่อง "เบิกจ่ายเดือนนี้" "เบิกจ่ายสะสม" และ "ไตรมาส 1-4" กว้างเท่ากับช่อง "แผนภาพรวม (บาท)" (ตารางกรอกข้อมูลรายจ่ายรายวิทยาเขต) — ความกว้างช่องกรอกเท่ากับช่องแผนภาพรวม (118px) */
-  body[data-page="expense"] table.expense-grid{--exp-money-w:118px;}
-  body[data-page="expense"] table.expense-grid td:not(.cat-cell):not(.no-cell):not(.plan-cell) input[data-money]{
-    width:var(--exp-money-w);min-width:var(--exp-money-w);max-width:var(--exp-money-w);box-sizing:border-box;
-  }
-  /* หน้า "แยกไตรมาส": ช่องที่เป็นตัวเลขคำนวณอัตโนมัติ (แผนภาพรวม/รวม/กลุ่ม มทร.อีสาน) กว้างเท่าช่องกรอกของหน้าวิทยาเขต */
-  body[data-page="expense"] table.quarter-split-grid td:not(.cat-cell):not(.no-cell),
-  body[data-page="expense"] table.quarter-split-grid th.plan-head{min-width:calc(var(--exp-money-w) + 25.5px);}
   body[data-page="expense"] table.expense-grid td.total-cell,
   body[data-page="expense"] table.expense-grid tr.grand-total td{font-size:15.5px;}
   body[data-page="expense"] .cat-cell-inner{align-items:flex-start;}
@@ -654,6 +645,20 @@
   }
   th.po-head{background:#FFE0B2;color:#8A4B00;}
   table.po-grid td input[type="number"]{background:#FFF7EC;}
+
+  /* ---------- ขนาดช่องตัวเลขทุกคอลัมน์ให้เท่ากับ "แผนภาพรวม (บาท)" ----------
+     ใช้กับหน้าวิทยาเขต (เบิกจ่ายสะสม / เบิกจ่ายเดือนนี้ / ไตรมาส) และหน้า "แยกไตรมาส" (ไตรมาส 1-4 / รวม / มทร.อีสาน)
+     ช่องกรอก = 118px (เท่าช่องแผนภาพรวม) + padding 12px ซ้าย-ขวา + เส้นขอบ => คอลัมน์ละ 144px ทุกคอลัมน์
+     ไม่กระทบหน้า PO (po-grid) */
+  body[data-page="expense"] table.expense-grid:not(.po-grid) td.plan-cell input,
+  body[data-page="expense"] table.expense-grid:not(.po-grid) td input[id^="eg_"],
+  body[data-page="expense"] table.expense-grid:not(.po-grid) td input[id^="eqs_"]{
+    width:118px;min-width:118px;
+  }
+  body[data-page="expense"] table.expense-grid:not(.po-grid) td:not(.no-cell):not(.cat-cell),
+  body[data-page="expense"] table.expense-grid:not(.po-grid) th.col-letter-head:nth-child(n+3){
+    width:144px;min-width:144px;
+  }
 </style>
 </head>
 <body>
@@ -2507,6 +2512,21 @@ const EXPENSE_FISCAL_MONTHS = ["ต.ค.","พ.ย.","ธ.ค.","ม.ค.","ก.
 const EXPENSE_QUARTER_AT = {2:1, 5:2, 8:3, 11:4}; // ดัชนีเดือน(0-based) ที่ปิดไตรมาส -> เลขไตรมาส
 const EXPENSE_REPORT_TITLE = y => `รายงานสถานะการใช้จ่ายงบประมาณ (แผน-ผล การเบิกจ่ายงบประมาณแผ่นดิน) ประจำปีงบประมาณ พ.ศ. ${y}`;
 const EXPENSE_FILE_BASE = 'แผน-ผลการเบิกจ่ายงบประมาณแผ่นดิน';
+
+// ===== ตั้งค่า Google Sheet แทนตารางกรอกข้อมูลหน้ารายจ่าย =====
+// USE_GOOGLE_SHEET = true  -> หน้ารายจ่ายฝังชีตแทนตารางเดิม (โค้ดตารางเดิมยังอยู่ครบ)
+// USE_GOOGLE_SHEET = false -> กลับไปใช้ตารางเดิมในเว็บ (ข้อมูลใน Supabase)
+const USE_GOOGLE_SHEET = true;
+const EXPENSE_GSHEET = {
+  id: '1JyKOkyccQIhWhwpSp9ErRekMZ5d6CvDQDZTv9GAZMmY',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbxKqSz9zslN5cDiLcJxy-HPf-SFCMDpTsZn340zrbGF64ohw7_SD8KNBWXFq3bf09uPdw/exec',   // URL เว็บแอป Apps Script (ดูไฟล์ apps_script_import.gs) — ถ้าใส่ ปุ่มนำเข้าจะเขียนข้อมูลลงชีตให้อัตโนมัติ; เว้นว่าง = คัดลอกข้อมูลไปวางในชีตเอง (Ctrl+V)
+  scriptToken: 'rmuti',  // รหัสลับ ต้องตรงกับค่า TOKEN ในสคริปต์
+  gid: '',   // ใส่เลข gid ของแท็บที่ต้องการให้เปิด/อ่านค่า (ดูจาก ...#gid=123456 ท้ายลิงก์ชีต) — เว้นว่าง = แท็บแรก
+  // เค้าโครงชีตต้องตรงกับไฟล์เทมเพลต: คอลัมน์ A=ประเภทรายจ่าย, B=แผนภาพรวม, C=ต.ค.(เบิกจ่ายสะสม),
+  // แล้วเดือนละ 2 คอลัมน์ (เบิกจ่ายเดือนนี้, เบิกจ่ายสะสม) และคอลัมน์ไตรมาสต่อท้ายธ.ค./มี.ค./มิ.ย./ก.ย.
+  // แถวข้อมูลแถวแรกคือแถวที่คอลัมน์ A ตรงกับชื่อหมวดแรก (EXPENSE_CATS[0]) — เว็บหาแถวนี้เองอัตโนมัติ
+};
+const gsheetUrl = (path)=> `https://docs.google.com/spreadsheets/d/${EXPENSE_GSHEET.id}/${path}`;
 const EXPENSE_CATS = [
   {label:'มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน', level:0},
   {label:'รายการบุคลากรภาครัฐ', level:0},
@@ -2690,32 +2710,28 @@ let autoSaveTimer = null;
 
 async function runAutoSave(){
   if(!currentUser || !isEditAllowed()) return; // ไม่ล็อกอิน หรือระบบปิดการแก้ไขอยู่ — ข้ามเงียบ ๆ
-  // ถ้าผู้ใช้กำลังพิมพ์/แก้สูตรอยู่ในช่อง (ช่องที่โฟกัสอยู่ขึ้นต้นด้วย "=") ห้ามบันทึกอัตโนมัติตอนนี้
-  // เพราะขั้นตอนคำนวณก่อนบันทึกจะจัดการช่องนั้นเหมือนคลิกออกจากช่อง: สูตรที่พิมพ์ค้างอยู่จะถูกล้างเป็นค่าว่าง
-  // หรือสูตรที่กำลังแก้จะถูกแทนที่ด้วยตัวเลขผลลัพธ์กลางคัน (เหมือน "สูตรหายเอง") — เลื่อนไปลองใหม่ใน 10 วินาที
-  const ae = document.activeElement;
-  if(ae && ae.tagName==='INPUT' && (ae.value||'').trim().startsWith('=') && ae.closest('#expenseGridBody, #incomeGridBody')){
-    if(!window.__autoSaveRetry){
-      window.__autoSaveRetry = setTimeout(()=>{ window.__autoSaveRetry = null; runAutoSave(); }, 10000);
-    }
-    return;
-  }
+  // ถ้าผู้ใช้กำลังพิมพ์สูตรค้างอยู่ในช่อง (ขึ้นต้นด้วย "=" ยังไม่ออกจากช่อง) ให้ข้ามรอบนี้ไปก่อน
+  // ไม่งั้น forceRecalc...Now() จะคำนวณ/เขียนทับข้อความที่กำลังพิมพ์ หรือล้างช่องทิ้งถ้าสูตรยังพิมพ์ไม่จบ
+  if(!__gridDirty) return; // ไม่มีการแก้ไขที่ยังไม่บันทึก — ไม่ต้องเขียนทับฐานข้อมูล (กันเครื่องที่ข้อมูลเก่าเขียนทับของคนอื่น)
+  const __ae = document.activeElement;
+  if(__ae && __ae.tagName==='INPUT' && __ae.closest('#expenseGridBody, #incomeGridBody') && String(__ae.value||'').trim().startsWith('=')) return;
   try{
     if(activePage==='income' && document.getElementById('incomeGridBody')){
       const flow = INCOME_FLOWS[incomeActiveFlow];
-      const year = document.getElementById('igYear')?.value || incomeGridYear;
-      const campus = document.getElementById('igCampus')?.value || incomeGridCampus;
-      const unit = document.getElementById('igUnit')?.value || incomeGridUnit;
-      const incomeType = flow.key==='expense' ? (document.getElementById('igIncomeType')?.value || incomeGridIncomeType) : undefined;
+      // ใช้ค่าของตารางที่ "วาดอยู่จริง" ไม่ใช่ค่าที่พิมพ์ค้างในช่องเลือกปี/วิทยาเขต (ยังไม่ได้กดยืนยัน) ไม่งั้นจะบันทึกข้อมูลผิดปี/ผิดที่
+      const year = incomeGridYear;
+      const campus = incomeGridCampus;
+      const unit = incomeGridUnit;
+      const incomeType = flow.key==='expense' ? incomeGridIncomeType : undefined;
       forceRecalcIncomeGridNow();
       const {ok} = await collectAndPersistIncomeGrid(flow, year, campus, unit, incomeType);
-      if(ok) showToast('💾 บันทึกอัตโนมัติแล้ว');
+      if(ok){ __gridDirty = false; showToast('💾 บันทึกอัตโนมัติแล้ว'); }
     }else if(activePage==='expense' && document.getElementById('expenseGridBody')){
-      const year = document.getElementById('egYear')?.value || expenseGridYear;
-      const campus = document.getElementById('egCampus')?.value || expenseGridCampus;
+      const year = expenseGridYear;
+      const campus = expenseGridCampus;
       forceRecalcExpenseGridNow();
       const {ok} = await collectAndPersistExpenseGrid(year, campus);
-      if(ok) showToast('💾 บันทึกอัตโนมัติแล้ว');
+      if(ok){ __gridDirty = false; showToast('💾 บันทึกอัตโนมัติแล้ว'); }
     }
   }catch(e){ console.error('autosave failed', e); }
 }
@@ -2727,19 +2743,23 @@ function stopAutoSave(){
   if(autoSaveTimer){ clearInterval(autoSaveTimer); autoSaveTimer = null; }
 }
 
-// ---------- กันตารางกรอกข้อมูลถูกวาดใหม่ทับตัวเลขที่กำลังพิมพ์ ----------
-// เดิม: ทุกครั้งที่มีการบันทึกข้อมูล (autosave ทุก 2 นาที หรือผู้ใช้คนอื่นกดบันทึก) realtime จะวาดตารางใหม่จาก cache ทันที
-// ตัวเลข/สูตรที่เพิ่งพิมพ์แต่ยังไม่ได้บันทึกจึงหายไปเอง — ตอนนี้จำไว้ว่าตารางนี้ "มีการแก้ไขที่ยังไม่บันทึก" (ติดที่ tbody
-// ซึ่งจะถูกสร้างใหม่ทุกครั้งที่ render จึงรีเซ็ตเองอัตโนมัติ) แล้วข้ามการวาดใหม่จาก realtime ไปจนกว่าจะบันทึก/เปลี่ยนหน้า
+// ---------- ติดตามว่า "ผู้ใช้พิมพ์แก้ตารางจริง ๆ และยังไม่ได้บันทึก" ----------
+// ใช้ 2 อย่าง: (1) บันทึกอัตโนมัติจะทำงานเฉพาะเมื่อมีการแก้จริง — เครื่องที่เปิดค้างไว้เฉย ๆ (ข้อมูลเก่า) จะไม่เขียนทับฐานข้อมูลอีก
+// (2) ถ้าคนอื่นบันทึกระหว่างที่เรากำลังกรอก จะไม่วาดตารางใหม่ทับสิ่งที่พิมพ์ค้างอยู่
+let __gridDirty = false;
 document.addEventListener('input', e=>{
-  const tb = e.target && e.target.closest && e.target.closest('#expenseGridBody, #incomeGridBody');
-  if(tb) tb.__dirty = true;
+  if(!e.isTrusted) return; // event ที่โค้ดสร้างเอง (เช่นตอนคำนวณสูตร) ไม่นับ — นับเฉพาะที่คนพิมพ์จริง
+  const t = e.target;
+  if(t && t.closest && t.closest('#expenseGridBody, #incomeGridBody')) __gridDirty = true;
 }, true);
-function gridHasUnsavedEdits(){
-  const tb = document.querySelector('#expenseGridBody, #incomeGridBody');
-  if(tb && tb.__dirty) return true;
-  const ae = document.activeElement;
-  return !!(ae && ae.closest && ae.closest('#expenseGridBody, #incomeGridBody') && ae.tagName==='INPUT');
+function __gridUnsaved(page){
+  return __gridDirty && (page==='expense' || page==='income') && !!document.getElementById(page==='expense' ? 'expenseGridBody' : 'incomeGridBody');
+}
+let __lastOthersToast = 0;
+function __notifyOthersSaved(){
+  if(Date.now() - __lastOthersToast < 15000) return;
+  __lastOthersToast = Date.now();
+  showToast('มีผู้ใช้อื่นเพิ่งบันทึกข้อมูล — ตารางของคุณยังไม่รีเฟรชเพื่อไม่ให้ข้อมูลที่กำลังกรอกหาย กดบันทึกเพื่อรวมข้อมูลล่าสุด');
 }
 
 // ---------- realtime sync (so everyone sees new data instantly, no re-login needed) ----------
@@ -2764,39 +2784,37 @@ function subscribeRealtime(){
       }
       if(row && row.key === EXPENSE_FORMULA_LOCK_KEY){
         if(payload.eventType === 'DELETE') return;
-        expenseFormulaLocked = !!(payload.new && payload.new.value);
-        if(activePage==='expense' && !editing.expense && !gridHasUnsavedEdits()) withKeptScroll(renderExpensePage);
+        const newExpLock = !!(payload.new && payload.new.value);
+        if(newExpLock === expenseFormulaLocked) return; // ไม่เปลี่ยน (เช่น เราเป็นคนกดเอง) ไม่ต้องวาดใหม่
+        expenseFormulaLocked = newExpLock;
+        if(activePage==='expense' && !editing.expense) withKeptScroll(renderExpensePage);
         return;
       }
       if(row && row.key === INCOME_FORMULA_LOCK_KEY){
         if(payload.eventType === 'DELETE') return;
-        incomeFormulaLocked = !!(payload.new && payload.new.value);
-        if(activePage==='income' && !editing.income && !gridHasUnsavedEdits()) withKeptScroll(renderIncomePage);
+        const newIncLock = !!(payload.new && payload.new.value);
+        if(newIncLock === incomeFormulaLocked) return;
+        incomeFormulaLocked = newIncLock;
+        if(activePage==='income' && !editing.income) withKeptScroll(renderIncomePage);
         return;
       }
       const catTargetArr = row && catArrForKey(row.key);
       if(row && catTargetArr){
         if(payload.eventType === 'DELETE') return;
         const items = payload.new && payload.new.value;
+        if(__recentOwnWrite(row.key) || (Array.isArray(items) && __sameData(items, catTargetArr))) return; // เราเป็นคนบันทึกเอง/ข้อมูลเหมือนเดิม ไม่ต้องวาดหน้าใหม่
         if(Array.isArray(items) && items.length) replaceArrayContents(catTargetArr, items);
         const catPage = (row.key===CAT_STORAGE_KEYS.expense) ? 'expense' : 'income';
-        if(catPage === activePage && !editing[catPage] && !gridHasUnsavedEdits()) withKeptScroll(()=>renderPage(catPage));
+        if(catPage === activePage && !editing[catPage]) withKeptScroll(()=>renderPage(catPage));
         return;
       }
 
-      // สูตรที่ใช้ร่วมกัน (rmuti_expense_formula_shared) — เดิมโหลดครั้งเดียวตอนเข้าระบบแล้วไม่เคยอัปเดตตามคนอื่น
-      // ทำให้พอมีคนบันทึกจากหน้าจอที่ข้อมูลสูตรเก่ากว่า จะเขียนทับสูตรที่คนอื่น/แท็บอื่นบันทึกไว้หายไปทั้งก้อน
-      // จึงอัปเดต cache ตามทุกครั้งที่มีการเปลี่ยน (ไม่วาดหน้าใหม่ เพื่อไม่ให้ทับที่กำลังพิมพ์) และข้ามเสียงสะท้อนของการบันทึกของตัวเอง
-      if(row && row.key === 'rmuti_expense_formula_shared'){
-        if(payload.eventType === 'DELETE') return;
-        if(Date.now() < (window.__fsOwnUntil||0)) return;
-        if(payload.new && Array.isArray(payload.new.value)){ cache.expenseFormulaShared = payload.new.value; }
-        else sGet(row.key).then(v=>{ if(Date.now() >= (window.__fsOwnUntil||0)) cache.expenseFormulaShared = v || []; });
-        return;
-      }
       const page = row && STORAGEKEY_TO_PAGE[row.key];
       const cacheKey = row && STORAGEKEY_TO_CACHEKEY[row.key];
       if(!page || !cacheKey || payload.eventType === 'DELETE') return;
+      // [แก้หน้ากระโดดหลังบันทึก] ข้อมูลที่เครื่องนี้เพิ่งบันทึกเอง จะสะท้อนกลับมาทาง realtime ด้วย — เดิมทำให้วาดหน้าใหม่ทั้งหน้า
+      // (สกอลล์เด้งกลับด้านบน/เสียโฟกัส และอาจเอาข้อมูลเก่าทับข้อมูลใหม่) ตอนนี้ข้ามถ้าเป็นการเขียนของเราเอง
+      if(__recentOwnWrite(row.key)) return;
       // Supabase Realtime only guarantees the full row (incl. the "value" jsonb
       // column) on UPDATE when the table's REPLICA IDENTITY is FULL. If it isn't,
       // payload.new sometimes only carries the primary key, so payload.new.value
@@ -2804,18 +2822,27 @@ function subscribeRealtime(){
       // list to empty — so instead, re-fetch the row directly from the database
       // whenever the realtime payload didn't actually include the data.
       if(payload.new && Array.isArray(payload.new.value)){
+        if(__sameData(payload.new.value, cache[cacheKey])) return; // ข้อมูลเหมือนที่มีอยู่แล้ว ไม่ต้องทำอะไร
         cache[cacheKey] = payload.new.value;
       }else{
-        sGet(row.key).then(v=>{
+        sGetStrict(row.key).then(r=>{
+          if(!r.ok) return; // อ่านไม่สำเร็จ: ห้ามเคลียร์ cache เป็นว่าง (เดิมทำให้บันทึกรอบถัดไปเขียนทับข้อมูลจริงจนหาย)
+          const v = r.value;
+          if(__sameData(v || [], cache[cacheKey])) return; // ไม่มีอะไรเปลี่ยน ไม่ต้องวาดใหม่
           cache[cacheKey] = v || [];
-          if(page === activePage && !editing[page] && !gridHasUnsavedEdits()) withKeptScroll(()=>renderPage(page));
+          if(page === activePage && !editing[page]){
+            if(__gridUnsaved(page)){ __notifyOthersSaved(); return; }
+            withKeptScroll(()=>renderPage(page));
+          }
         });
         return;
       }
       // only touch the screen if we're looking at that page right now, and
       // avoid interrupting someone who is mid-edit on their own form
-      if(page === activePage && !editing[page] && !gridHasUnsavedEdits()){
-        withKeptScroll(()=>renderPage(page));
+      if(page === activePage && !editing[page]){
+        // ถ้าเครื่องนี้มีตัวเลข/สูตรที่กรอกค้างและยังไม่บันทึก ห้ามวาดตารางใหม่ (จะทำให้ที่กรอกไว้หายทันที)
+        if(__gridUnsaved(page)){ __notifyOthersSaved(); return; }
+        withKeptScroll(()=>renderPage(page)); // มีคนอื่นแก้ข้อมูล: วาดใหม่แต่คงตำแหน่งเลื่อนเดิมไว้
       }
     })
     .subscribe();
@@ -2839,7 +2866,51 @@ async function sGet(key){
     return data ? data.value : null;
   }catch(e){ console.error("storage get failed", e); return null; }
 }
+// อ่านแบบ "ตรวจสอบได้": แยกให้ชัดระหว่าง "ไม่มีข้อมูลจริง" (ok:true,value:null) กับ "อ่านไม่สำเร็จ" (ok:false)
+// เดิม sGet คืน null ทั้ง 2 กรณี ทำให้เน็ตหลุดชั่วคราวถูกตีความว่า "ไม่มีข้อมูล" แล้วบันทึกทับข้อมูลจริงในฐานข้อมูลจนหาย
+async function sGetStrict(key, tries){
+  tries = tries || 3;
+  for(let i=0;i<tries;i++){
+    try{
+      const { data, error } = await supabaseClient.from('kv_store').select('value').eq('key', key).maybeSingle();
+      if(error) throw error;
+      return { ok:true, value: data ? data.value : null };
+    }catch(e){
+      console.error('storage strict get failed', key, e);
+      if(i<tries-1) await new Promise(r=>setTimeout(r, 400*(i+1)));
+    }
+  }
+  return { ok:false, value:null };
+}
+// key ข้อมูลหลักที่บันทึกเป็น "อาร์เรย์ทั้งก้อน" — ห้ามเขียนถ้าโหลดข้อมูลตอนเข้าระบบไม่สำเร็จ
+const DATA_KEYS_GUARDED = new Set(['rmuti_income','rmuti_expense','rmuti_strategy','rmuti_po','rmuti_income_totals','rmuti_expense_totals','rmuti_expense_formula_shared']);
+let dataLoadFailed = false;
+// ก่อนบันทึก: ดึงข้อมูลล่าสุดจากฐานข้อมูลมาเป็นฐานก่อน (แล้วค่อยแทนเฉพาะส่วนที่กำลังบันทึกด้วยค่าในตาราง)
+// กันเครื่องที่ข้อมูลเก่า/ค้างอยู่ เขียนทับข้อมูลที่คนอื่นเพิ่งบันทึกไว้ — คืน false ถ้าอ่านไม่สำเร็จ (ให้ยกเลิกการบันทึก)
+async function refreshCacheFromDb(pairs){
+  const results = await Promise.all(pairs.map(([sk])=>sGetStrict(sk)));
+  if(results.some(r=>!r.ok)){
+    showToast('เชื่อมต่อฐานข้อมูลไม่ได้ จึงยังไม่บันทึก (เพื่อป้องกันข้อมูลเดิมถูกเขียนทับ) กรุณาลองใหม่อีกครั้ง', true);
+    return false;
+  }
+  pairs.forEach(([sk,ck],i)=>{ cache[ck] = Array.isArray(results[i].value) ? results[i].value : []; });
+  return true;
+}
+// [แก้หน้ากระโดดหลังบันทึก] จำ key ที่เครื่องนี้เพิ่งเขียนเอง เพื่อให้ realtime ที่สะท้อนกลับมาไม่วาดหน้าใหม่ทับ (ดู subscribeRealtime)
+const __ownWriteAt = {};
+function __recentOwnWrite(key){ return __ownWriteAt[key] && (Date.now() - __ownWriteAt[key] < 8000); }
+// เทียบข้อมูลแบบไม่สนลำดับ key (Supabase jsonb จัดลำดับ key ใหม่ จึงเทียบ JSON ตรง ๆ ไม่ได้)
+function __stableJson(v){
+  return JSON.stringify(v, (k, val)=> (val && typeof val==='object' && !Array.isArray(val))
+    ? Object.keys(val).sort().reduce((o,kk)=>{ o[kk]=val[kk]; return o; }, {}) : val);
+}
+function __sameData(a, b){ try{ return __stableJson(a) === __stableJson(b); }catch(e){ return false; } }
 async function sSet(key, value){
+  if(dataLoadFailed && DATA_KEYS_GUARDED.has(key)){
+    showToast('โหลดข้อมูลจากฐานข้อมูลไม่สำเร็จตอนเข้าระบบ จึงปิดการบันทึกไว้เพื่อไม่ให้ข้อมูลเดิมถูกเขียนทับ — กรุณารีเฟรชหน้าเว็บ (F5)', true);
+    return false;
+  }
+  __ownWriteAt[key] = Date.now();
   try{
     const { error } = await supabaseClient
       .from('kv_store')
@@ -3143,26 +3214,28 @@ async function submitCatModal(){
 function withKeptScroll(renderFn){
   const content = document.getElementById('content');
   const contentScrollTop = content ? content.scrollTop : 0;
-  const winScrollY = window.scrollY;
   const gridWrap = document.querySelector('.income-grid-wrap');
   const gridScrollTop = gridWrap ? gridWrap.scrollTop : 0;
   const gridScrollLeft = gridWrap ? gridWrap.scrollLeft : 0;
   const tableWrap = document.querySelector('.table-wrap');
   const tableScrollTop = tableWrap ? tableWrap.scrollTop : 0;
   const tableScrollLeft = tableWrap ? tableWrap.scrollLeft : 0;
+  // จำช่องที่โฟกัสอยู่ (ถ้ามี id) เพื่อคืนโฟกัสหลังวาดใหม่ ไม่ให้ต้องคลิกช่องซ้ำหลังบันทึก
+  const ae = document.activeElement;
+  const activeId = (ae && ae.id && ae.tagName==='INPUT' && content && content.contains(ae)) ? ae.id : null;
 
   renderFn();
 
   const restore = ()=>{
     const newContent = document.getElementById('content');
     if(newContent) newContent.scrollTop = contentScrollTop;
-    window.scrollTo(window.scrollX, winScrollY);
     const newGridWrap = document.querySelector('.income-grid-wrap');
     if(newGridWrap){ newGridWrap.scrollTop = gridScrollTop; newGridWrap.scrollLeft = gridScrollLeft; }
     const newTableWrap = document.querySelector('.table-wrap');
     if(newTableWrap){ newTableWrap.scrollTop = tableScrollTop; newTableWrap.scrollLeft = tableScrollLeft; }
   };
   restore();
+  if(activeId){ const nel = document.getElementById(activeId); if(nel){ try{ nel.focus({preventScroll:true}); }catch(e){} } }
   requestAnimationFrame(restore);
 }
 
@@ -3288,7 +3361,6 @@ async function toggleCategoryLock(source, ci){
 function renderCurrentSourcePageKeepScroll(source){
   const content = document.getElementById('content');
   const contentScrollTop = content ? content.scrollTop : 0;
-  const winScrollY = window.scrollY;
   const gridWrap = document.querySelector('.income-grid-wrap');
   const gridScrollTop = gridWrap ? gridWrap.scrollTop : 0;
   const gridScrollLeft = gridWrap ? gridWrap.scrollLeft : 0;
@@ -3298,7 +3370,6 @@ function renderCurrentSourcePageKeepScroll(source){
   const restore = ()=>{
     const newContent = document.getElementById('content');
     if(newContent) newContent.scrollTop = contentScrollTop;
-    window.scrollTo(window.scrollX, winScrollY);
     const newGridWrap = document.querySelector('.income-grid-wrap');
     if(newGridWrap){ newGridWrap.scrollTop = gridScrollTop; newGridWrap.scrollLeft = gridScrollLeft; }
   };
@@ -3323,8 +3394,9 @@ function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/
   function stripCommas(v){ return String(v==null?'':v).replace(/,/g,''); }
   function isFormula(v){ return String(v||'').trim().startsWith('='); }
   function formatMoneyStr(v){
+    if(isFormula(v)) return String(v).trim(); // สูตร: ห้ามตัดคอมม่า (เช่น =SUM(D3,F3,H3))
     let s = stripCommas(v).trim();
-    if(s==='' || isFormula(s)) return s;
+    if(s==='') return s;
     const neg = s.startsWith('-') ? '-' : '';
     if(neg) s = s.slice(1);
     const parts = s.split('.');
@@ -3335,10 +3407,11 @@ function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/
   Object.defineProperty(proto, 'value', {
     get(){
       const raw = nativeDesc.get.call(this);
-      return (this.dataset && this.dataset.money) ? stripCommas(raw) : raw;
+      if(!this.hasAttribute('data-money')) return raw;
+      return isFormula(raw) ? raw : stripCommas(raw); // สูตรคงคอมม่าไว้
     },
     set(v){
-      if(this.dataset && this.dataset.money){
+      if(this.hasAttribute('data-money')){
         nativeDesc.set.call(this, formatMoneyStr(v));
       } else {
         nativeDesc.set.call(this, v);
@@ -3347,7 +3420,7 @@ function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/
     configurable: true
   });
   // ใช้ตอนต้องการเขียนค่าดิบ (ไม่แทรกคอมม่า) เช่น ตอนโฟกัสเข้าช่องเพื่อแก้ไข
-  window.__setPlainInputValue = function(el, v){ nativeDesc.set.call(el, stripCommas(v)); };
+  window.__setPlainInputValue = function(el, v){ nativeDesc.set.call(el, isFormula(v) ? String(v) : stripCommas(v)); };
   // ใช้ตอนสร้าง HTML: แปลงตัวเลขเป็นสตริงมีคอมม่า สำหรับใส่ใน attribute value="..." ตอน render ครั้งแรก
   window.moneyAttr = function(v){
     if(v===''||v===null||v===undefined) return '';
@@ -3360,6 +3433,21 @@ function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/
 // + เลขแถว (ใช้เลขเดียวกับคอลัมน์ "ลำดับ" ทางซ้ายของตาราง) พิมพ์สูตรขึ้นต้นด้วย "=" ในช่องตัวเลขได้เลย
 // รองรับ: + - * / ( ) และฟังก์ชัน SUM(ช่วง) เช่น =C3+D3 หรือ =SUM(D3:D6) หรือ =SUM(D3,F3,H3)
 // =========================================================================
+// [แก้ประสิทธิภาพ] ตอนพิมพ์ ไม่คำนวณทั้งตารางทุกตัวอักษรอีกต่อไป — รอให้หยุดพิมพ์ ~100ms แล้วคำนวณครั้งเดียว
+// (ปุ่มบันทึก/คำนวณ/บันทึกอัตโนมัติยังเรียก forceRecalc...Now() แบบทันที ค่าที่บันทึกจึงถูกต้องเสมอ)
+const __recalcTimers = {};
+function __scheduleRecalc(key, el, fn, delay){
+  clearTimeout(__recalcTimers[key]);
+  __recalcTimers[key] = setTimeout(()=>{
+    __recalcTimers[key] = null;
+    // ถ้ายังพิมพ์ช่องนี้อยู่ ห้ามเขียนทับช่องนั้น (เหมือน skipEl เดิม) ถ้าออกจากช่องแล้วไม่ต้องข้าม
+    const skip = (el && el.isConnected && document.activeElement===el) ? el : undefined;
+    fn(skip);
+  }, delay);
+}
+function scheduleExpenseRecalc(el){ __scheduleRecalc('exp', el, recomputeAllExpenseFormulas, 100); }
+function scheduleIncomeRecalc(el){ __scheduleRecalc('inc', el, recomputeAllIncomeFormulas, 100); }
+
 function gridColLetter(n){
   let s = '';
   while(n > 0){ const rem = (n-1)%26; s = String.fromCharCode(65+rem)+s; n = Math.floor((n-1)/26); }
@@ -3372,30 +3460,31 @@ function gridColNum(letters){
 }
 // หาเซลล์ใน tbody ตามพิกัดคอลัมน์ตัวอักษร+เลขแถว แล้วคืนค่าตัวเลขของเซลล์นั้น (อ่านจาก input ถ้ามี ไม่งั้นอ่านจากข้อความ)
 // ถ้าเซลล์ที่อ้างอิงถึงกำลังพิมพ์สูตรค้างอยู่ (ยังไม่ blur) จะคำนวณสูตรนั้นสดๆ ให้ทันที (เรียลไทม์) แทนที่จะอ่านค่า NaN
-// แผนที่พิกัดเซลล์ (คอลัมน์+แถว → <td>) เก็บไว้ที่ tbody เพื่อไม่ต้องไล่ค้นหาทั้งตารางด้วย querySelector ทุกครั้งที่สูตรอ้างอิงเซลล์
-// (เดิมทุกการพิมพ์หนึ่งตัวอักษรจะค้นหาซ้ำเป็นพัน ๆ ครั้ง จึงพิมพ์ช้า/สะดุด) — แผนที่จะถูกล้างอัตโนมัติเมื่อโครงสร้างตารางเปลี่ยน (render ใหม่/เพิ่ม-ลบแถว)
-// การพิมพ์ค่าลงช่องไม่ทำให้โครงสร้างเปลี่ยน จึงใช้แผนที่เดิมต่อได้
-function gridCellMap(tbody){
-  if(tbody.__cellMap) return tbody.__cellMap;
+// [แก้ประสิทธิภาพ] เดิมเรียก tbody.querySelector('[data-col=..][data-row=..]') ทุกครั้งที่สูตรอ้างอิงเซลล์ ซึ่งสแกนทั้งตาราง
+// (หลายพันเซลล์) แล้วถูกเรียกซ้ำทุกสูตร x ทุกรอบ x ทุกตัวอักษรที่พิมพ์ -> หน่วง/สะดุด
+// ตอนนี้สร้างดัชนี "คอลัมน์|แถว" -> เซลล์ ครั้งเดียวต่อ tbody แล้วค้นจาก Map (เร็ว) สร้างใหม่อัตโนมัติถ้าจำนวนแถวเปลี่ยน/เซลล์หลุดจาก DOM
+const __gridCellIndex = new WeakMap();
+function __buildGridCellIndex(tbody){
   const map = new Map();
-  tbody.querySelectorAll('[data-col][data-row]').forEach(td=>{
-    const k = td.getAttribute('data-col')+'|'+td.getAttribute('data-row');
-    if(!map.has(k)) map.set(k, td);
+  tbody.querySelectorAll('[data-col][data-row]').forEach(cell=>{
+    const k = cell.getAttribute('data-col') + '|' + cell.getAttribute('data-row');
+    if(map.has(k)) return; // เหมือน querySelector เดิม: ใช้เซลล์แรกที่พบ
+    map.set(k, { cell, inp: cell.tagName==='INPUT' ? cell : cell.querySelector('input') });
   });
-  tbody.__cellMap = map;
-  if(!tbody.__cellMapObs && typeof MutationObserver!=='undefined'){
-    tbody.__cellMapObs = new MutationObserver(()=>{ tbody.__cellMap = null; });
-    tbody.__cellMapObs.observe(tbody, {childList:true, subtree:true});
-  }
+  map.__rows = tbody.rows.length;
+  __gridCellIndex.set(tbody, map);
   return map;
 }
 function gridCellValue(tbody, colLetter, rowNum, depth){
   if(!tbody) return NaN;
-  const cell = gridCellMap(tbody).get(colLetter+'|'+rowNum);
-  if(!cell) return NaN;
-  const inp = cell.tagName==='INPUT' ? cell : cell.querySelector('input');
-  if(inp) return liveCellNum(inp, depth);
-  const txt = (cell.textContent||'').replace(/,/g,'').trim();
+  const key = colLetter + '|' + rowNum;
+  let map = __gridCellIndex.get(tbody);
+  if(!map || map.__rows !== tbody.rows.length) map = __buildGridCellIndex(tbody);
+  let rec = map.get(key);
+  if(rec && !(rec.inp || rec.cell).isConnected){ map = __buildGridCellIndex(tbody); rec = map.get(key); }
+  if(!rec) return NaN;
+  if(rec.inp) return liveCellNum(rec.inp, depth);
+  const txt = (rec.cell.textContent||'').replace(/,/g,'').trim();
   return txt==='' ? 0 : (Number(txt)||0);
 }
 // อ่านค่าตัวเลข "สด" ของช่อง input หนึ่งช่อง: ถ้าเป็นตัวเลขปกติอ่านตรงๆ ถ้ากำลังพิมพ์สูตร (ขึ้นต้นด้วย =) ให้คำนวณสูตรนั้นทันที
@@ -3495,50 +3584,26 @@ function evalGridFormula(expr, tbody, depth){
 // เรียกตอนคลิกออกจากช่อง (blur): ถ้าพิมพ์สูตรขึ้นต้นด้วย "=" ให้คำนวณผลลัพธ์แทนที่ค่าที่แสดง
 // แล้วยิง event "input" ต่อ เพื่อให้ระบบคำนวณผลรวม/สะสม/ไตรมาสเดิมทำงานต่อเนื่องตามปกติ
 function handleFormulaBlur(inputEl){
-  // ปรับอักขระที่คีย์บอร์ดมือถือ/ระบบแก้คำอัตโนมัติมักแทรกให้กลับเป็นอักขระปกติก่อนตรวจสอบสูตร
-  // เช่น "＝" (เครื่องหมายเท่ากับแบบเต็มความกว้าง), เส้นประยาว/สั้นที่ไม่ใช่ลบธรรมดา, เลขไทย ๐-๙
-  // ถ้าไม่ปรับ สูตรที่ผู้ใช้พิมพ์ถูกต้องตามสายตา (แต่มีอักขระแปลกปลอมที่มองไม่ออก) จะถูกตีว่า "ไม่ถูกต้อง" แล้วถูกล้างทิ้ง
-  const raw = normalizeFormulaText((inputEl.value||'').trim());
-  if(raw !== (inputEl.value||'').trim()) inputEl.value = raw;
+  const raw = (inputEl.value||'').trim();
   if(raw.startsWith('=')){
     const tbody = inputEl.closest('tbody');
     try{
       const val = evalGridFormula(raw.slice(1).toUpperCase(), tbody);
       inputEl.dataset.formula = raw;
       inputEl.value = (Math.round(val*100)/100);
-      inputEl.classList.remove('formula-error');
     }catch(e){
-      // เดิม: ถ้าเป็นสูตรใหม่ที่ยังไม่เคยบันทึกไว้ก่อน (ไม่มี dataset.formula เก่า) จะล้างช่องเป็นค่าว่างทันที
-      // ทำให้ดูเหมือน "พิมพ์สูตรเสร็จแล้วสูตรหายไปเอง" ทั้งที่จริงคือสูตรพิมพ์ผิด/ไม่สมบูรณ์
-      // ตอนนี้: คงข้อความที่พิมพ์ไว้ในช่องเสมอ (ไม่ล้างทิ้ง) ให้ผู้ใช้เห็น แก้ไข หรือกดออกจากช่องซ้ำได้เอง
-      showToast('สูตรไม่ถูกต้อง: ' + raw + ' — ยังไม่ได้บันทึก กรุณาตรวจสอบและแก้ไขสูตรอีกครั้ง');
-      inputEl.value = raw;
-      inputEl.classList.add('formula-error');
+      showToast('สูตรไม่ถูกต้อง: ' + raw);
+      inputEl.value = inputEl.dataset.formula || '';
       markFormulaIndicator(inputEl);
       return;
     }
   } else {
     delete inputEl.dataset.formula;
-    inputEl.classList.remove('formula-error');
     // ช่องกรอกเงิน (data-money): เขียนค่ากลับผ่าน property "value" อีกครั้งเพื่อแทรกคอมม่าคั่นหลักพัน
     if(inputEl.dataset.money) inputEl.value = raw;
   }
   markFormulaIndicator(inputEl);
   inputEl.dispatchEvent(new Event('input', {bubbles:true}));
-}
-// แปลงอักขระที่พิมพ์/วางมาแล้วหน้าตาคล้ายอักขระสูตรปกติ แต่จริง ๆ เป็นคนละตัวกัน (คีย์บอร์ดมือถือ/ระบบแก้คำอัตโนมัติ
-// มักแทรกให้โดยผู้ใช้ไม่รู้ตัว) ให้กลับเป็นอักขระ ASCII ปกติก่อนตรวจสอบ/คำนวณสูตร กันไม่ให้สูตรที่ "ดูถูกต้อง" ถูกปฏิเสธ
-function normalizeFormulaText(v){
-  if(!v) return v;
-  return v
-    .replace(/[＝]/g, '=')
-    .replace(/[－ー−–—]/g, '-')
-    .replace(/[×✕✖]/g, '*')
-    .replace(/[÷]/g, '/')
-    .replace(/[（]/g, '(')
-    .replace(/[）]/g, ')')
-    .replace(/[，]/g, ',')
-    .replace(/[๐-๙]/g, d => String('๐๑๒๓๔๕๖๗๘๙'.indexOf(d)));
 }
 // เรียกตอนคลิกเข้าช่อง (focus): ถ้าเซลล์นี้เคยพิมพ์สูตรไว้ ให้แสดงสูตรกลับมาให้แก้ไขได้ (เหมือนคลิกเซลล์ใน Excel แล้วเห็นสูตร)
 // ถ้าเป็นช่องกรอกเงิน (data-money) และไม่มีสูตร ให้ตัดคอมม่าออกชั่วคราวระหว่างแก้ไข เพื่อไม่ให้พิมพ์/ลบตัวเลขสับสน
@@ -4017,13 +4082,15 @@ document.querySelectorAll('.navlink').forEach(btn=>{
 
 // ---------- data load ----------
 async function loadAllData(){
-  cache.income = (await sGet('rmuti_income')) || [];
-  cache.expense = (await sGet('rmuti_expense')) || [];
-  cache.strategy = (await sGet('rmuti_strategy')) || [];
-  cache.po = (await sGet('rmuti_po')) || [];
-  cache.incomeTotals = (await sGet('rmuti_income_totals')) || [];
-  cache.expenseTotals = (await sGet('rmuti_expense_totals')) || [];
-  cache.expenseFormulaShared = (await sGet('rmuti_expense_formula_shared')) || [];
+  dataLoadFailed = false;
+  const __loadPairs = [['rmuti_income','income'],['rmuti_expense','expense'],['rmuti_strategy','strategy'],['rmuti_po','po'],
+    ['rmuti_income_totals','incomeTotals'],['rmuti_expense_totals','expenseTotals'],['rmuti_expense_formula_shared','expenseFormulaShared']];
+  for(const [sk,ck] of __loadPairs){
+    const r = await sGetStrict(sk);
+    if(!r.ok) dataLoadFailed = true;
+    cache[ck] = Array.isArray(r.value) ? r.value : [];
+  }
+  if(dataLoadFailed) showToast('โหลดข้อมูลจากฐานข้อมูลไม่สำเร็จ — ปิดการบันทึกไว้เพื่อป้องกันข้อมูลเดิมหาย กรุณารีเฟรชหน้าเว็บ (F5)', true);
   expenseFormulaLocked = !!(await sGet(EXPENSE_FORMULA_LOCK_KEY));
   incomeFormulaLocked = !!(await sGet(INCOME_FORMULA_LOCK_KEY));
   await loadCategoryOverrides();
@@ -4222,8 +4289,8 @@ function buildIncomeGridTable(flow, campus, incomeType, unit){
       const aLockAttr = aLocked ? ' readonly title="สูตรถูกล็อค — กดปุ่ม \'ปลดล็อคสูตร\' ก่อนจึงจะแก้ไขได้"' : (aFormula ? ` title="สูตร: ${escAttr(aFormula)}"` : '');
       const pCls = pFormula ? ` class="has-formula${pLocked?' locked-formula':''}"` : '';
       const aCls = aFormula ? ` class="has-formula${aLocked?' locked-formula':''}"` : '';
-      monthCells += `<td data-col="${cl.plan}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" id="ig_p_${ci}_${mi}" value="${moneyAttr(p)}"${pFormulaAttr}${pCls}${pLockAttr} oninput="incomeInputRecalc(${ci}, this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
-      monthCells += `<td data-col="${cl.actual}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" id="ig_a_${ci}_${mi}" value="${moneyAttr(a)}"${aFormulaAttr}${aCls}${aLockAttr} oninput="incomeInputRecalc(${ci}, this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
+      monthCells += `<td data-col="${cl.plan}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" id="ig_p_${ci}_${mi}" value="${moneyAttr(p)}"${pFormulaAttr}${pCls}${pLockAttr} oninput="recalcIncomeRow(${ci}, true); scheduleIncomeRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
+      monthCells += `<td data-col="${cl.actual}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" id="ig_a_${ci}_${mi}" value="${moneyAttr(a)}"${aFormulaAttr}${aCls}${aLockAttr} oninput="recalcIncomeRow(${ci}, true); scheduleIncomeRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
     });
     // ถ้าผู้ใช้เคยแก้ไข/ใส่สูตรในช่อง "รวมทั้งสิ้น" ของแถวนี้ไว้ ให้ใช้ค่านั้นแทนผลรวมอัตโนมัติ
     // (ค่านี้ถูกเก็บไว้ต่างหากใน cache.incomeTotals จึงไม่หายไปไม่ว่าจะกดบันทึกหรือสลับหน้าไปมา)
@@ -4245,8 +4312,8 @@ function buildIncomeGridTable(flow, campus, incomeType, unit){
     body += `<tr id="cat-row-income-${cat.id}" data-ci="${ci}" draggable="${cat.locked?'false':'true'}">
       <td class="no-cell" data-col="${letNo}" data-row="${rowNum}">${rowNum}</td>
       <td class="cat-cell lvl-${cat.level}${cat.locked?' row-locked':''}" data-col="${letCat}" data-row="${rowNum}">${catCellHtml('income', cat, ci, cats)}</td>
-      <td class="total-cell" data-col="${letTP}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${tpCls}" id="ig_tp_${ci}" value="${moneyAttr(tpVal)}"${tpManualAttr}${tpFormulaAttr}${tpLockAttr} oninput="markIncomeTotalManual(this); recalcIncomeGrandTotal(); recalcIncomeStats(); recomputeAllIncomeFormulas(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>
-      <td class="total-cell" data-col="${letTA}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${taCls}" id="ig_ta_${ci}" value="${moneyAttr(taVal)}"${taManualAttr}${taFormulaAttr}${taLockAttr} oninput="markIncomeTotalManual(this); recalcIncomeGrandTotal(); recalcIncomeStats(); recomputeAllIncomeFormulas(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>
+      <td class="total-cell" data-col="${letTP}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${tpCls}" id="ig_tp_${ci}" value="${moneyAttr(tpVal)}"${tpManualAttr}${tpFormulaAttr}${tpLockAttr} oninput="markIncomeTotalManual(this); scheduleIncomeRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>
+      <td class="total-cell" data-col="${letTA}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${taCls}" id="ig_ta_${ci}" value="${moneyAttr(taVal)}"${taManualAttr}${taFormulaAttr}${taLockAttr} oninput="markIncomeTotalManual(this); scheduleIncomeRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>
       ${monthCells}
     </tr>`;
   });
@@ -4269,20 +4336,7 @@ function markIncomeTotalManual(inputEl){
 }
 
 // รวมยอด "รวมทั้งสิ้น" ต่อแถว = ผลบวกของ 12 เดือนของแถวนั้นเอง (สูตร +) — เว้นแต่ผู้ใช้จะแก้ไข/ใส่สูตรเองแล้ว
-let __incRecalcRows = new Set(), __incRecalcSkip = null, __incRecalcPending = false;
-function incomeInputRecalc(ci, el){
-  __incRecalcRows.add(ci); __incRecalcSkip = el;
-  if(__incRecalcPending) return;
-  __incRecalcPending = true;
-  requestAnimationFrame(()=>{
-    __incRecalcPending = false;
-    const rows = [...__incRecalcRows]; __incRecalcRows.clear();
-    const sk = __incRecalcSkip; __incRecalcSkip = null;
-    rows.forEach(recalcIncomeRow);
-    recomputeAllIncomeFormulas(sk);
-  });
-}
-function recalcIncomeRow(ci){
+function recalcIncomeRow(ci, skipTotals){
   let p=0, a=0;
   EXPENSE_FISCAL_MONTHS.forEach((m,mi)=>{
     p += Number(document.getElementById(`ig_p_${ci}_${mi}`)?.value)||0;
@@ -4292,6 +4346,7 @@ function recalcIncomeRow(ci){
   const ta = document.getElementById(`ig_ta_${ci}`);
   if(tp && !tp.dataset.manual) tp.value = p;
   if(ta && !ta.dataset.manual) ta.value = a;
+  if(skipTotals) return; // ตอนพิมพ์: ให้ scheduleIncomeRecalc คำนวณผลรวมใหญ่/สถิติครั้งเดียวทีหลัง
   recalcIncomeGrandTotal();
   recalcIncomeStats();
 }
@@ -4477,6 +4532,7 @@ function recalcIncomeGrandTotal(){
 // อ่านค่า/สูตรปัจจุบันจากตาราง (DOM) ทั้งหมด แล้วบันทึกทับ cache.income/cache.incomeTotals ของขอบเขต (ปีงบฯ, วิทยาเขต, คณะ/หน่วยงาน, ประเภทรายได้) นี้
 // แยกออกมาจาก saveIncomeGrid() เพื่อให้เรียกใช้ซ้ำได้แบบเงียบๆ (ไม่มี toast/scroll) เช่น ตอนล็อคสูตร
 async function collectAndPersistIncomeGrid(flow, year, campus, unit, incomeType){
+  if(!(await refreshCacheFromDb([['rmuti_income','income'],['rmuti_income_totals','incomeTotals']]))) return {ok:false, added:0};
   // แทนที่ข้อมูลเดิมของ (ปีงบฯ, วิทยาเขต, คณะ/หน่วยงาน, ประเภทรายได้, ประเภท) นี้ทั้งหมด ด้วยค่าที่กรอกในตารางตอนนี้
   cache.income = cache.income.filter(r => !(r.flow===flow.key && String(r.year)===String(year) && r.campus===campus
     && (r.unit||'')===unit
@@ -4740,6 +4796,7 @@ function wireComboSelect(selectId){
 }
 
 function renderIncomePage(){
+  __gridDirty = false; // วาดตารางใหม่จากข้อมูลที่บันทึกแล้ว = ไม่มีตัวเลขค้างที่ยังไม่บันทึก
   activePage = 'income';
   const flow = INCOME_FLOWS[incomeActiveFlow];
   const campusOptions = getIncomeCampusOptions(flow, incomeGridIncomeType);
@@ -5130,8 +5187,11 @@ async function dedupeExpenseFormulaShared(){
     if(r.qFormula && Object.keys(r.qFormula).length){
       rec.qFormula = Object.assign({}, r.qFormula, rec.qFormula||{});
     }
-    if(r.qSplitFormula && Object.keys(r.qSplitFormula).length){
-      rec.qSplitFormula = Object.assign({}, r.qSplitFormula, rec.qSplitFormula||{});
+    if(r.qsFormula && Object.keys(r.qsFormula).length){ // สูตรของมุมมอง "แยกไตรมาส" {วิทยาเขต:{ไตรมาส:สูตร}}
+      rec.qsFormula = rec.qsFormula || {};
+      Object.keys(r.qsFormula).forEach(campus=>{
+        rec.qsFormula[campus] = Object.assign({}, r.qsFormula[campus], rec.qsFormula[campus]||{});
+      });
     }
   });
   cache.expenseFormulaShared = [...merged.values()];
@@ -5142,7 +5202,7 @@ async function dedupeExpenseFormulaShared(){
 // ลบสูตรที่เก็บไว้ของ (ปีงบฯ, หมวดหมู่) นี้ทิ้ง ถ้าไม่มีสูตรเหลืออยู่เลยสักช่อง (กันไม่ให้มี record ว่างเปล่าค้างอยู่)
 function pruneExpenseFormulaShared(rec){
   if(!rec) return;
-  const empty = !rec.planFormula && isEmptyObj(rec.actualFormula) && isEmptyObj(rec.cumFormula) && isEmptyObj(rec.qFormula) && isEmptyObj(rec.qSplitFormula);
+  const empty = !rec.planFormula && isEmptyObj(rec.actualFormula) && isEmptyObj(rec.cumFormula) && isEmptyObj(rec.qFormula) && isEmptyObj(rec.qsFormula);
   if(empty){
     const idx = cache.expenseFormulaShared.indexOf(rec);
     if(idx>=0) cache.expenseFormulaShared.splice(idx,1);
@@ -5150,7 +5210,6 @@ function pruneExpenseFormulaShared(rec){
 }
 function isEmptyObj(o){ return !o || Object.keys(o).length===0; }
 async function saveExpenseFormulaShared(){
-  window.__fsOwnUntil = Date.now() + 4000; // ข้ามเสียงสะท้อน realtime ของการบันทึกครั้งนี้
   return await sSet('rmuti_expense_formula_shared', cache.expenseFormulaShared);
 }
 
@@ -5185,24 +5244,26 @@ const EXPENSE_QUARTER_SPLIT_GROUPS = [
 function buildExpenseQuarterSplitTable(){
   const REAL_CAMPUSES = CAMPUSES.filter(c=>c!=='แยกไตรมาส');
   const year = expenseGridYear;
-  const LOCK_TITLE = "สูตรถูกล็อค — กดปุ่ม 'ปลดล็อคสูตร' ก่อนจึงจะแก้ไขได้";
 
-  // ตัวอักษรคอลัมน์แบบ Excel: A=ลำดับ, B=ประเภทรายจ่าย, C=แผนภาพรวม, แล้วกลุ่มละ 5 คอลัมน์ (ไตรมาส 1-4 + รวม) เริ่มที่ D
+  // ตัวอักษรคอลัมน์แบบ Excel ใช้อ้างอิงเซลล์ในสูตร (เช่น =D3+E3 หรือ =SUM(D3:G3)) — เลขแถวใช้เลขเดียวกับคอลัมน์ "ลำดับ"
+  // A=ลำดับ, B=ประเภทรายจ่าย, C=แผนภาพรวม, จากนั้นกลุ่มละ 5 คอลัมน์ (ไตรมาส 1-4 + รวม):
+  // มทร.อีสาน = D-H, นครราชสีมา = I-M, สุรินทร์ = N-R, ขอนแก่น = S-W, สกลนคร = X-AB
   const letNo = gridColLetter(1), letCat = gridColLetter(2), letPlan = gridColLetter(3);
-  const grpLetter = (gi, k) => gridColLetter(4 + gi*5 + k); // k = 0..3 ไตรมาส 1-4, k = 4 รวม
+  const groupCols = gi => [0,1,2,3,4].map(k => gridColLetter(4 + gi*5 + k)); // [Q1,Q2,Q3,Q4,รวม]
 
-  let colLetterRow = `<th class="col-letter-head">${letNo}</th><th class="col-letter-head">${letCat}</th><th class="col-letter-head">${letPlan}</th>`;
   let head1 = `<th class="no-head" rowspan="2">ลำดับ</th><th class="cat-head" rowspan="2">ประเภทรายจ่าย</th><th class="plan-head" rowspan="2">แผนภาพรวม<br>(บาท)</th>`;
   let head2 = '';
+  let colLetterRow = `<th class="col-letter-head">${letNo}</th><th class="col-letter-head">${letCat}</th><th class="col-letter-head">${letPlan}</th>`;
   EXPENSE_QUARTER_SPLIT_GROUPS.forEach((g, gi)=>{
-    for(let k=0; k<5; k++) colLetterRow += `<th class="col-letter-head">${grpLetter(gi,k)}</th>`;
     head1 += `<th colspan="5">${g.label}</th>`;
     head2 += `<th>ไตรมาส 1</th><th>ไตรมาส 2</th><th>ไตรมาส 3</th><th>ไตรมาส 4</th><th>รวม</th>`;
+    groupCols(gi).forEach(l=>{ colLetterRow += `<th class="col-letter-head">${l}</th>`; });
   });
 
   let body = '';
   EXPENSE_CATS.forEach((cat, ci)=>{
     const rowNum = ci+1;
+    const formulaShared = getExpenseFormulaShared(cat);
 
     // ผลรวมของแต่ละวิทยาเขตจริง (ใช้ทั้งคำนวณคอลัมน์กลุ่มของตัวเองและรวมเป็นกลุ่ม "มทร.อีสาน")
     const perCampusQ = {}; // {campus: [q1,q2,q3,q4]}
@@ -5217,37 +5278,37 @@ function buildExpenseQuarterSplitTable(){
     const totalQ = [0,1,2,3].map(i => REAL_CAMPUSES.reduce((sum,c)=> sum + perCampusQ[c][i], 0));
     const totalSum = totalQ.reduce((a,b)=>a+b,0);
 
-    // สูตรของตารางนี้เก็บแบบใช้ร่วมกันทุกปีงบประมาณ (คีย์ด้วย catId) ที่ qSplitFormula[วิทยาเขต][ไตรมาส]
-    const formulaShared = getExpenseFormulaShared(cat);
-
     let groupCells = '';
     EXPENSE_QUARTER_SPLIT_GROUPS.forEach((g, gi)=>{
+      const cols = groupCols(gi);
       if(g.campus){
         const cIdx = REAL_CAMPUSES.indexOf(g.campus);
         if(cat.scopeCampus && cat.scopeCampus!==g.campus){
-          // หัวข้อนี้ผูกไว้เฉพาะอีกวิทยาเขตหนึ่ง — แสดงเป็นช่องว่างที่แก้ไขไม่ได้ (แยกเป็น 5 ช่องเพื่อให้สูตรอ้างอิงได้ ค่าเป็น 0)
-          for(let k=0; k<5; k++){
-            groupCells += `<td class="total-cell" data-col="${grpLetter(gi,k)}" data-row="${rowNum}" style="color:var(--brown-soft);">${k===0?'—':''}</td>`;
-          }
+          // หัวข้อนี้ผูกไว้เฉพาะอีกวิทยาเขตหนึ่ง — คอลัมน์ของวิทยาเขตอื่นแสดงเป็นช่องว่างที่แก้ไขไม่ได้ (ยังอ้างอิงในสูตรได้ ค่า = 0)
+          cols.forEach(l=>{
+            groupCells += `<td class="total-cell" data-col="${l}" data-row="${rowNum}" style="color:var(--brown-soft);">—</td>`;
+          });
           return;
         }
-        // กลุ่มวิทยาเขตจริง — ช่องไตรมาส 1-4 แก้ไขได้ตรงนี้เลย (ตัวเลข หรือสูตรที่ขึ้นต้นด้วย "=")
+        // กลุ่มวิทยาเขตจริง — ช่องไตรมาส 1-4 กรอกได้ทั้งตัวเลขและสูตร (ขึ้นต้นด้วย "=")
+        // สูตรของหน้านี้เก็บแยกจากสูตรของตารางรายวิทยาเขต (qsFormula) เพราะตำแหน่งคอลัมน์ไม่ตรงกัน
         const override = getExpenseCellOverride(year, g.campus, cat);
-        const campusFormulas = formulaShared && formulaShared.qSplitFormula && formulaShared.qSplitFormula[g.campus];
+        const campusFormulas = formulaShared && formulaShared.qsFormula && formulaShared.qsFormula[g.campus];
         [1,2,3,4].forEach(qn=>{
           const shown = (override && override.qManual && override.qManual[qn]!==undefined) ? override.qManual[qn] : '';
-          const formula = campusFormulas && campusFormulas[qn];
-          const fAttr = formula ? ` data-formula="${escAttr(formula)}"` : '';
-          const locked = expenseFormulaLocked && !!formula;
-          const lockAttr = locked ? ` readonly title="${LOCK_TITLE}"` : (formula ? ` title="สูตร: ${escAttr(formula)}"` : '');
-          const cls = 'total-input qtr-input' + (formula ? ' has-formula' : '') + (locked ? ' locked-formula' : '');
-          groupCells += `<td class="total-cell" data-col="${grpLetter(gi,qn-1)}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${cls}" id="eqs_${ci}_${cIdx}_${qn}" value="${moneyAttr(shown)}"${fAttr}${lockAttr} oninput="expenseSplitInputRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
+          const f = campusFormulas && campusFormulas[qn];
+          const fAttr = f ? ` data-formula="${escAttr(f)}"` : '';
+          // ถ้าล็อคสูตรไว้และช่องนี้มีสูตรอยู่จริง ห้ามแก้ไข (readonly) จนกว่าจะปลดล็อค
+          const locked = expenseFormulaLocked && !!f;
+          const lockAttr = locked ? ' readonly title="สูตรถูกล็อค — กดปุ่ม \'ปลดล็อคสูตร\' ก่อนจึงจะแก้ไขได้"' : (f ? ` title="สูตร: ${escAttr(f)}"` : '');
+          const cls = 'total-input qtr-input' + (f ? ' has-formula' : '') + (locked ? ' locked-formula' : '');
+          groupCells += `<td class="total-cell" data-col="${cols[qn-1]}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${cls}" id="eqs_${ci}_${cIdx}_${qn}" value="${moneyAttr(shown)}"${fAttr}${lockAttr} oninput="scheduleExpenseRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
         });
-        groupCells += `<td class="total-cell qtr-cell" data-col="${grpLetter(gi,4)}" data-row="${rowNum}" id="eqs_sum_${ci}_${cIdx}">${fmtNum(perCampusQ[g.campus].reduce((a,b)=>a+b,0))}</td>`;
+        groupCells += `<td class="total-cell qtr-cell" data-col="${cols[4]}" data-row="${rowNum}" id="eqs_sum_${ci}_${cIdx}">${fmtNum(perCampusQ[g.campus].reduce((a,b)=>a+b,0))}</td>`;
       }else{
         // กลุ่ม "มทร.อีสาน" — รวมทุกวิทยาเขตจริง คำนวณอัตโนมัติ (อ่านอย่างเดียว แต่อ้างอิงในสูตรได้)
-        totalQ.forEach((v,qi)=>{ groupCells += `<td class="total-cell" data-col="${grpLetter(gi,qi)}" data-row="${rowNum}" id="eqs_all_${ci}_${qi+1}">${fmtNum(v)}</td>`; });
-        groupCells += `<td class="total-cell qtr-cell" data-col="${grpLetter(gi,4)}" data-row="${rowNum}" id="eqs_sum_${ci}_all">${fmtNum(totalSum)}</td>`;
+        totalQ.forEach((v,qi)=>{ groupCells += `<td class="total-cell" data-col="${cols[qi]}" data-row="${rowNum}" id="eqs_all_${ci}_${qi+1}">${fmtNum(v)}</td>`; });
+        groupCells += `<td class="total-cell qtr-cell" data-col="${cols[4]}" data-row="${rowNum}" id="eqs_sum_${ci}_all">${fmtNum(totalSum)}</td>`;
       }
     });
 
@@ -5262,18 +5323,11 @@ function buildExpenseQuarterSplitTable(){
   return `<table class="income-grid expense-grid quarter-split-grid"><thead><tr class="col-letter-row">${colLetterRow}</tr><tr>${head1}</tr><tr>${head2}</tr></thead><tbody id="expenseGridBody">${body}</tbody></table>`;
 }
 
-// อัปเดตคอลัมน์ "รวม" ของแต่ละวิทยาเขตและกลุ่ม "มทร.อีสาน" (รวมทุกวิทยาเขต) ของแถวหมวดหมู่นี้
-// อ่านค่าแบบ "สด" (liveCellNum) เพื่อให้ช่องที่กำลังพิมพ์สูตรค้างอยู่ก็นับรวมทันที — คืน true ถ้ามีช่องใดเปลี่ยนค่า
+// อัปเดตคอลัมน์ "รวม" ของแต่ละวิทยาเขตและกลุ่ม "มทร.อีสาน" (รวมทุกวิทยาเขต) ของแถวหมวดหมู่นี้แบบเรียลไทม์
+// อ่านค่าผ่าน liveCellNum เพื่อให้ช่องที่กำลังพิมพ์สูตรค้างอยู่ (ยังไม่ blur) ถูกนับด้วยค่าที่คำนวณสด ๆ
 function recalcExpenseQuarterSplitRow(ci){
   const REAL_CAMPUSES = CAMPUSES.filter(c=>c!=='แยกไตรมาส');
   const totals = [0,0,0,0];
-  let changed = false;
-  const setText = (id, n)=>{
-    const cell = document.getElementById(id);
-    if(!cell) return;
-    const t = fmtNum(Math.round(n*100)/100);
-    if(cell.textContent !== t){ cell.textContent = t; changed = true; }
-  };
   REAL_CAMPUSES.forEach((campus, cIdx)=>{
     let campusSum = 0;
     [1,2,3,4].forEach((qn,qi)=>{
@@ -5282,75 +5336,76 @@ function recalcExpenseQuarterSplitRow(ci){
       totals[qi] += v;
       campusSum += v;
     });
-    setText(`eqs_sum_${ci}_${cIdx}`, campusSum);
+    const sumCell = document.getElementById(`eqs_sum_${ci}_${cIdx}`);
+    if(sumCell) sumCell.textContent = fmtNum(campusSum);
   });
-  [1,2,3,4].forEach((qn,qi)=> setText(`eqs_all_${ci}_${qn}`, totals[qi]));
-  setText(`eqs_sum_${ci}_all`, totals.reduce((a,b)=>a+b,0));
-  return changed;
+  [1,2,3,4].forEach((qn,qi)=>{
+    const cell = document.getElementById(`eqs_all_${ci}_${qn}`);
+    if(cell) cell.textContent = fmtNum(totals[qi]);
+  });
+  const allSumCell = document.getElementById(`eqs_sum_${ci}_all`);
+  if(allSumCell) allSumCell.textContent = fmtNum(totals.reduce((a,b)=>a+b,0));
+}
+function recalcAllExpenseQuarterSplitRows(){
+  document.querySelectorAll('#expenseGridBody tr[data-ci]').forEach(tr=>{
+    recalcExpenseQuarterSplitRow(Number(tr.dataset.ci));
+  });
 }
 
-// คำนวณทั้งตารางใหม่: ช่องรวมทุกแถว + ช่องที่มีสูตร (วนจนค่านิ่ง เพราะสูตรอาจอ้างช่อง "รวม" และช่อง "รวม" ก็นับช่องที่เป็นสูตร)
-// skipEl = ช่องที่กำลังพิมพ์อยู่ ห้ามเขียนทับ (ช่องอื่นอ่านค่าสดของช่องนั้นผ่าน liveCellNum อยู่แล้ว)
-function recomputeExpenseSplitAll(skipEl){
+// คำนวณสูตรทุกช่องในตาราง "แยกไตรมาส" ใหม่ (เรียกทุกครั้งที่พิมพ์/ออกจากช่อง/เปิดหน้า)
+// สูตรอาจอ้างอิงคอลัมน์ "รวม" หรือกลุ่ม "มทร.อีสาน" ซึ่งเป็นผลบวกของช่องอื่น และช่องรวมก็ขึ้นกับช่องสูตรอีกที
+// จึงวนคำนวณ "ผลรวม -> สูตร" สลับกันจนค่านิ่ง (สูงสุด 25 รอบ กันสูตรอ้างอิงวนเป็นวงกลม)
+// skipEl = ช่องที่ผู้ใช้กำลังพิมพ์อยู่ — ห้ามเขียนทับข้อความที่พิมพ์ค้าง
+function recomputeAllQuarterSplitFormulas(skipEl){
   const tbody = document.getElementById('expenseGridBody');
   if(!tbody) return;
   const inputs = [...tbody.querySelectorAll('input[data-formula]')];
+  recalcAllExpenseQuarterSplitRows();
   for(let pass=0; pass<25; pass++){
     let changed = false;
-    EXPENSE_CATS.forEach((c, ci)=>{ if(recalcExpenseQuarterSplitRow(ci)) changed = true; });
     inputs.forEach(el=>{
-      if(el===skipEl || el===document.activeElement) return;
-      const f = el.dataset.formula;
-      if(!f) return;
+      if(el===skipEl) return;
+      const raw = el.dataset.formula;
+      if(!raw) return;
       try{
-        const val = evalGridFormula(f.slice(1).toUpperCase(), tbody);
+        const val = evalGridFormula(raw.slice(1).toUpperCase(), tbody);
         const rounded = Math.round(val*100)/100;
         if(String(rounded) !== String(el.value).trim()){ changed = true; el.value = rounded; }
       }catch(e){ /* คำนวณไม่ได้ (เช่น อ้างอิงเซลล์ที่ไม่มี) ปล่อยค่าเดิมไว้ */ }
     });
+    recalcAllExpenseQuarterSplitRows();
     if(!changed) break;
   }
-  EXPENSE_CATS.forEach((c, ci)=> recalcExpenseQuarterSplitRow(ci));
-}
-// รวมการคำนวณตอนพิมพ์ให้เหลือครั้งเดียวต่อเฟรมหน้าจอ
-let __expSplitPending = false, __expSplitSkip = null;
-function expenseSplitInputRecalc(el){
-  __expSplitSkip = el;
-  if(__expSplitPending) return;
-  __expSplitPending = true;
-  requestAnimationFrame(()=>{
-    __expSplitPending = false;
-    const sk = __expSplitSkip; __expSplitSkip = null;
-    recomputeExpenseSplitAll(sk);
-  });
+  recalcExpenseStats();
 }
 
-// อ่านค่า/สูตร "ไตรมาส 1-4" จากตาราง "แยกไตรมาส" ของทุกวิทยาเขตจริงพร้อมกัน แล้วบันทึกแบบเงียบ ๆ (ไม่มี toast/render ซ้ำ)
-// ตัวเลข -> cache.expenseTotals (qManual/qDisplay ของแต่ละวิทยาเขต), สูตร -> cache.expenseFormulaShared[catId].qSplitFormula[วิทยาเขต][ไตรมาส]
-// ไม่แตะ "เบิกจ่ายสะสม" (cumManual) หรือสูตรของตารางแยกวิทยาเขตปกติ (plan/actual/cum/qFormula)
-async function collectAndPersistExpenseQuarterSplit(year){
-  if(!document.getElementById('expenseGridBody')) return {ok:true, added:0};
+// อ่านค่า/สูตร "ไตรมาส 1-4" ทั้งหมดจากตาราง "แยกไตรมาส" (DOM) แล้วบันทึกลง cache.expenseTotals (ค่าตัวเลขแยกตามวิทยาเขต)
+// และ cache.expenseFormulaShared[].qsFormula (สูตร ใช้ร่วมกันทุกปี แยกตามวิทยาเขต/ไตรมาส) — เงียบ ไม่มี toast/render
+// ตารางนี้แสดงทุกวิทยาเขตในแถวเดียวกัน จึงบันทึกทีเดียวทุกวิทยาเขต ต่างจากตารางแยกวิทยาเขตปกติที่บันทึกทีละวิทยาเขต
+// แก้ไข/เพิ่มเฉพาะ qManual/qDisplay ของแต่ละวิทยาเขต ไม่แตะ "เบิกจ่ายสะสม" (cumManual) หรือสูตรของตารางรายวิทยาเขต
+async function collectAndPersistExpenseQuarterSplitGrid(year){
   const REAL_CAMPUSES = CAMPUSES.filter(c=>c!=='แยกไตรมาส');
+  if(!(await refreshCacheFromDb([['rmuti_expense','expense'],['rmuti_expense_totals','expenseTotals'],['rmuti_expense_formula_shared','expenseFormulaShared']]))) return {ok:false, added:0};
 
   EXPENSE_CATS.forEach((cat, ci)=>{
-    const splitFormula = {};
-    let hasSplitFormula = false;
+    const qsFormula = {}; // {campus: {qn: '=สูตร'}}
+    let hasQsFormula = false;
+
     REAL_CAMPUSES.forEach((campus, cIdx)=>{
       if(cat.scopeCampus && cat.scopeCampus!==campus) return; // หัวข้อนี้ผูกไว้เฉพาะอีกวิทยาเขตหนึ่ง ไม่มีช่องให้กรอกในวิทยาเขตนี้
-      const qManual = {}, qDisplay = {};
-      let hasQManual = false, hasQDisplay = false;
+      const qManual = {}, qDisplay = {}, campusFormula = {};
+      let hasQManual = false, hasQDisplay = false, hasCampusFormula = false;
       [1,2,3,4].forEach(qn=>{
         const el = document.getElementById(`eqs_${ci}_${cIdx}_${qn}`);
         if(!el) return;
         const raw = (el.value||'').trim();
-        const val = Number(raw)||0; // ช่องสูตรที่คำนวณแล้ว ค่าใน input คือผลลัพธ์ (ตัวเลข)
+        const val = Number(raw)||0;
         if(val!==0){ qManual[qn] = val; hasQManual = true; }
         if(raw!==''){ qDisplay[qn] = val; hasQDisplay = true; }
-        if(el.dataset.formula){
-          (splitFormula[campus] = splitFormula[campus] || {})[qn] = el.dataset.formula;
-          hasSplitFormula = true;
-        }
+        if(el.dataset.formula){ campusFormula[qn] = el.dataset.formula; hasCampusFormula = true; }
       });
+      if(hasCampusFormula){ qsFormula[campus] = campusFormula; hasQsFormula = true; }
+
       let rec = cache.expenseTotals.find(r=> String(r.year)===String(year) && r.campus===campus && r.catId===cat.id);
       if(!rec){
         if(!hasQManual && !hasQDisplay) return; // ไม่มีอะไรต้องบันทึกสำหรับวิทยาเขต/หมวดหมู่นี้
@@ -5361,13 +5416,10 @@ async function collectAndPersistExpenseQuarterSplit(year){
       if(hasQDisplay) rec.qDisplay = qDisplay; else delete rec.qDisplay;
     });
 
-    const existing = getExpenseFormulaShared(cat);
-    if(hasSplitFormula){
-      getOrCreateExpenseFormulaShared(cat).qSplitFormula = splitFormula;
-    }else if(existing && existing.qSplitFormula){
-      delete existing.qSplitFormula;
-      pruneExpenseFormulaShared(existing);
-    }
+    // สูตรของหน้า "แยกไตรมาส" — ใช้ร่วมกันทุกปีงบประมาณ (เหมือนสูตรของตารางรายวิทยาเขต) เก็บที่ qsFormula ของหมวดหมู่นี้
+    const formulaShared = getOrCreateExpenseFormulaShared(cat);
+    if(hasQsFormula) formulaShared.qsFormula = qsFormula; else delete formulaShared.qsFormula;
+    pruneExpenseFormulaShared(formulaShared);
   });
   // ลบรายการที่ไม่เหลือข้อมูลอะไรอยู่เลย (ทั้งเบิกจ่ายสะสม/ไตรมาส) ทิ้งไป กันตารางค้างขยะ
   cache.expenseTotals = cache.expenseTotals.filter(r =>
@@ -5377,19 +5429,19 @@ async function collectAndPersistExpenseQuarterSplit(year){
 
   const ok = await sSet('rmuti_expense_totals', cache.expenseTotals);
   const ok2 = await saveExpenseFormulaShared();
-  return {ok: ok && ok2, added:0};
+  return {ok: ok && ok2, added: 0};
 }
 
-// ปุ่ม "บันทึกข้อมูลตาราง" ของหน้า "แยกไตรมาส"
+// ปุ่ม "บันทึกข้อมูลตาราง" ของมุมมอง "แยกไตรมาส"
 async function saveExpenseQuarterSplitGrid(){
   if(blockIfLocked()) return;
   const year = document.getElementById('egYear').value || CURRENT_BE_YEAR;
   expenseGridYear = year;
-  // คำนวณสูตรที่พิมพ์ค้างอยู่ (ยังไม่ได้คลิกออกจากช่อง) ให้เสร็จก่อนเก็บค่า
-  forceRecalcExpenseGridNow();
-  recomputeExpenseSplitAll();
 
-  const {ok} = await collectAndPersistExpenseQuarterSplit(year);
+  // คำนวณสูตรทุกช่องใหม่ก่อนเก็บค่าเสมอ ให้ค่าที่บันทึกตรงกับตัวเลขล่าสุดในตาราง
+  forceRecalcExpenseGridNow();
+
+  const {ok} = await collectAndPersistExpenseQuarterSplitGrid(year);
   if(ok){
     showToast('บันทึกข้อมูลไตรมาสเรียบร้อยแล้ว');
     withKeptScroll(renderExpensePage);
@@ -5449,9 +5501,10 @@ function buildExpenseGridTable(){
       const cl = monthColLetters[mi];
       const actualFormulaVal = formulaShared && formulaShared.actualFormula && formulaShared.actualFormula[m];
       const actualFormulaAttr = actualFormulaVal ? ` data-formula="${escAttr(actualFormulaVal)}"` : '';
-      const actualCls = actualFormulaVal ? ' class="has-formula"' : '';
-      const actualTitleAttr = actualFormulaVal ? ` title="สูตร: ${escAttr(actualFormulaVal)}"` : '';
-      monthCells += `<td data-col="${cl.actual}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" id="eg_a_${ci}_${mi}" value="${moneyAttr(raw)}"${actualFormulaAttr}${actualCls}${actualTitleAttr} oninput="expenseInputRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
+      const actualLocked = expenseFormulaLocked && !!actualFormulaVal;
+      const actualCls = actualFormulaVal ? ` class="has-formula${actualLocked?' locked-formula':''}"` : '';
+      const actualTitleAttr = actualLocked ? ' readonly title="สูตรถูกล็อค — กดปุ่ม \'ปลดล็อคสูตร\' ก่อนจึงจะแก้ไขได้"' : (actualFormulaVal ? ` title="สูตร: ${escAttr(actualFormulaVal)}"` : '');
+      monthCells += `<td data-col="${cl.actual}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" id="eg_a_${ci}_${mi}" value="${moneyAttr(raw)}"${actualFormulaAttr}${actualCls}${actualTitleAttr} oninput="scheduleExpenseRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
       if(mi!==0){
         // ช่อง "เบิกจ่ายสะสม" เป็นช่องเปล่าให้ผู้ใช้กรอกตัวเลข/สูตรเอง (ไม่คำนวณอัตโนมัติ) — คงค่า/สูตรที่เคยกรอกไว้ (ถ้ามี)
         const cumFormula = formulaShared && formulaShared.cumFormula && formulaShared.cumFormula[m];
@@ -5461,7 +5514,7 @@ function buildExpenseGridTable(){
         const cumLocked = expenseFormulaLocked && !!cumFormula;
         const cumLockAttr = cumLocked ? ' readonly title="สูตรถูกล็อค — กดปุ่ม \'ปลดล็อคสูตร\' ก่อนจึงจะแก้ไขได้"' : (cumFormula ? ` title="สูตร: ${escAttr(cumFormula)}"` : '');
         const cumCls = 'total-input' + (cumFormula ? ' has-formula' : '') + (cumLocked ? ' locked-formula' : '');
-        monthCells += `<td class="total-cell" data-col="${cl.cum}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${cumCls}" id="eg_c_${ci}_${mi}" value="${moneyAttr(cumShown)}"${cumFormulaAttr}${cumLockAttr} oninput="expenseInputRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
+        monthCells += `<td class="total-cell" data-col="${cl.cum}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${cumCls}" id="eg_c_${ci}_${mi}" value="${moneyAttr(cumShown)}"${cumFormulaAttr}${cumLockAttr} oninput="scheduleExpenseRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
       }
       if(EXPENSE_QUARTER_AT[mi]){
         const qn = EXPENSE_QUARTER_AT[mi];
@@ -5473,13 +5526,13 @@ function buildExpenseGridTable(){
         const qLocked = expenseFormulaLocked && !!qFormula;
         const qLockAttr = qLocked ? ' readonly title="สูตรถูกล็อค — กดปุ่ม \'ปลดล็อคสูตร\' ก่อนจึงจะแก้ไขได้"' : (qFormula ? ` title="สูตร: ${escAttr(qFormula)}"` : '');
         const qCls = 'total-input qtr-input' + (qFormula ? ' has-formula' : '') + (qLocked ? ' locked-formula' : '');
-        monthCells += `<td class="total-cell qtr-cell" data-col="${quarterColLetters[qn]}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${qCls}" id="eg_q_${ci}_${qn}" value="${moneyAttr(qShown)}"${qFormulaAttr}${qLockAttr} oninput="expenseInputRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
+        monthCells += `<td class="total-cell qtr-cell" data-col="${quarterColLetters[qn]}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" class="${qCls}" id="eg_q_${ci}_${qn}" value="${moneyAttr(qShown)}"${qFormulaAttr}${qLockAttr} oninput="scheduleExpenseRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>`;
       }
     });
     body += `<tr id="cat-row-expense-${cat.id}" data-ci="${ci}" draggable="${cat.locked?'false':'true'}">
       <td class="no-cell" data-col="${letNo}" data-row="${rowNum}">${rowNum}</td>
       <td class="cat-cell lvl-${cat.level}${cat.locked?' row-locked':''}${expenseCatHighlightClass(cat.label, ci)}${expenseCatBorderBoxClass(ci)}" data-col="${letCat}" data-row="${rowNum}">${catCellHtml('expense', cat, ci, EXPENSE_CATS)}</td>
-      <td class="plan-cell" data-col="${letPlan}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" id="eg_p_${ci}" value="${moneyAttr(planVal)}"${planFormulaAttr}${planLockAttr}${planCls} oninput="expenseInputRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>
+      <td class="plan-cell" data-col="${letPlan}" data-row="${rowNum}"><input type="text" inputmode="decimal" step="any" data-money="1" id="eg_p_${ci}" value="${moneyAttr(planVal)}"${planFormulaAttr}${planLockAttr}${planCls} oninput="scheduleExpenseRecalc(this)" onblur="handleFormulaBlur(this)" onfocus="handleFormulaFocus(this)"></td>
       ${monthCells}
     </tr>`;
   });
@@ -5493,9 +5546,10 @@ function buildExpenseGridTable(){
 // อ่านค่า/สูตรปัจจุบันจากตาราง (DOM) ทั้งหมด แล้วบันทึกทับ cache.expense/cache.expenseTotals ของ (ปีงบฯ, วิทยาเขต) นี้
 // แยกออกมาจาก saveExpenseGrid() เพื่อให้เรียกใช้ซ้ำได้แบบเงียบๆ (ไม่มี toast/scroll) เช่น ตอน sync ตัวเลขที่คำนวณใหม่ให้ตรงกับตารางแบบเรียลไทม์
 async function collectAndPersistExpenseGrid(year, campus){
-  // หน้า "แยกไตรมาส" ไม่มีช่อง eg_* ของตารางรายวิทยาเขต — ถ้าปล่อยผ่านไปจะลบสูตรที่ใช้ร่วมกันของทุกวิทยาเขตทิ้ง
-  // (autosave/ปุ่มล็อคสูตรเรียกฟังก์ชันนี้ตอนอยู่หน้านี้) จึงส่งไปบันทึกตารางแยกไตรมาสแทน
-  if(campus === 'แยกไตรมาส') return await collectAndPersistExpenseQuarterSplit(year);
+  // มุมมอง "แยกไตรมาส" ไม่มีช่อง eg_* ของตารางรายวิทยาเขต — ต้องใช้ตัวบันทึกของมุมมองนั้นเอง
+  // (กันไม่ให้ autosave / ปุ่มล็อคสูตร / ลบทั้งหมดแบบล็อคสูตร เขียนทับหรือลบสูตรที่ใช้ร่วมกันทิ้ง)
+  if(campus === 'แยกไตรมาส') return collectAndPersistExpenseQuarterSplitGrid(year);
+  if(!(await refreshCacheFromDb([['rmuti_expense','expense'],['rmuti_expense_totals','expenseTotals'],['rmuti_expense_formula_shared','expenseFormulaShared']]))) return {ok:false, added:0};
   cache.expense = cache.expense.filter(r => !(String(r.year)===String(year) && r.campus===campus));
   cache.expenseTotals = cache.expenseTotals.filter(r => !(String(r.year)===String(year) && r.campus===campus));
 
@@ -5592,22 +5646,10 @@ async function collectAndPersistExpenseGrid(year, campus){
 // จำกัดไว้ 25 รอบกันกรณีสูตรอ้างอิงกันเป็นวงกลม (circular reference) ไม่ให้วนไม่รู้จบ
 // skipEl (ถ้าระบุ) คือช่องที่ผู้ใช้กำลังพิมพ์อยู่ตอนนี้ — ห้ามเขียนทับค่าที่กำลังพิมพ์ค้างอยู่ในช่องนั้น
 // (แต่ช่องอื่นที่มีสูตรอ้างอิงมาที่ช่องนี้ ยังคงอ่านค่าที่กำลังพิมพ์อยู่แบบสดๆ ได้ตามปกติผ่าน liveCellNum)
-// รวมการคำนวณของการพิมพ์ให้เหลือครั้งเดียวต่อเฟรมหน้าจอ (พิมพ์/วางเร็ว ๆ หรือแป้นค้างจะไม่คำนวณซ้ำทุกตัวอักษร)
-let __expRecalcPending = false, __expRecalcSkip = null;
-function expenseInputRecalc(el){
-  __expRecalcSkip = el;
-  if(__expRecalcPending) return;
-  __expRecalcPending = true;
-  requestAnimationFrame(()=>{
-    __expRecalcPending = false;
-    const sk = __expRecalcSkip; __expRecalcSkip = null;
-    recalcExpenseStats();
-    recomputeAllExpenseFormulas(sk);
-  });
-}
 function recomputeAllExpenseFormulas(skipEl){
   const tbody = document.getElementById('expenseGridBody');
   if(!tbody) return;
+  if(tbody.closest('table.quarter-split-grid')) return recomputeAllQuarterSplitFormulas(skipEl);
   const inputs = [...tbody.querySelectorAll('input[data-formula]')];
   for(let pass=0; pass<25; pass++){
     let changed = false;
@@ -5800,8 +5842,8 @@ function renderExpenseList(){
   if(selectAllChk) selectAllChk.disabled = false;
   tbody.innerHTML = rows.slice().reverse().map(r=>{
     const checked = selected.expense.has(r.id) ? 'checked' : '';
-    const sumActual = Object.values(r.actual||{}).reduce((a,b)=>a+(Number(b)||0),0);
-    const pct = r.plan>0 ? (sumActual/r.plan*100) : 0;
+    const sumActual = 0; // [ปรับตามคำขอ] ยังไม่ผูกช่อง "เบิกจ่ายเดือนนี้" กับสถิติ
+    const pct = 0;
     // ค่า "ไตรมาส" ของแถวนี้ — ใช้ qDisplay (ค่าที่คำนวณ/แสดงจริงตอนกดบันทึก ครอบคลุมทั้งช่องที่พิมพ์ตัวเลขเองและช่องที่เป็นสูตร)
     // ถ้าไม่มี qDisplay (ข้อมูลเก่าก่อนอัปเดต) ให้ย้อนกลับไปใช้ qManual แทน — ผูกด้วย (ปีงบฯ, วิทยาเขต, catId) เดียวกับแถวนี้
     const totalOverride = r.catId ? cache.expenseTotals.find(t=> String(t.year)===String(r.year) && t.campus===r.campus && t.catId===r.catId) : null;
@@ -5824,32 +5866,240 @@ function renderExpenseList(){
   updateDeleteSelectedBtn('expense');
 }
 
+// ---------------------------------------------------------------------------
+// หน้ารายจ่ายแบบ Google Sheet: ฝังชีต (iframe) แทนตาราง + ปุ่มส่งออก + การ์ดสรุปที่อ่านค่าจากชีต
+// ข้อจำกัด: เว็บอ่านค่าในกรอบที่ฝังไม่ได้ จึงอ่านสรุปจากลิงก์ export CSV ของชีตแยกต่างหาก
+// (ชีตต้องแชร์แบบ "ทุกคนที่มีลิงก์ดูได้" อย่างน้อย) — ถ้าอ่านไม่ได้ การ์ดจะแสดง "-" พร้อมข้อความแจ้ง
+// ---------------------------------------------------------------------------
+function gsParseCsv(text){
+  const rows = []; let row = [], cur = '', q = false;
+  for(let i=0;i<text.length;i++){
+    const ch = text[i];
+    if(q){
+      if(ch==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else q=false; }
+      else cur += ch;
+    }else if(ch==='"') q = true;
+    else if(ch===','){ row.push(cur); cur=''; }
+    else if(ch==='\n' || ch==='\r'){ if(ch==='\r' && text[i+1]==='\n') i++; row.push(cur); rows.push(row); row=[]; cur=''; }
+    else cur += ch;
+  }
+  if(cur!=='' || row.length){ row.push(cur); rows.push(row); }
+  return rows;
+}
+function gsNum(v){
+  const n = Number(String(v ?? '').replace(/[,\s฿%]/g,''));
+  return isNaN(n) ? 0 : n;
+}
+async function gsFetchCsv(){
+  const gid = EXPENSE_GSHEET.gid ? `&gid=${encodeURIComponent(EXPENSE_GSHEET.gid)}` : '';
+  const urls = [
+    gsheetUrl(`export?format=csv${gid}`),
+    gsheetUrl(`gviz/tq?tqx=out:csv${gid}`)
+  ];
+  let lastErr;
+  for(const u of urls){
+    try{
+      const r = await fetch(u, {cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const t = await r.text();
+      if(/^\s*<(!doctype|html)/i.test(t)) throw new Error('ชีตยังไม่ได้แชร์แบบดูได้');
+      return gsParseCsv(t);
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('อ่านชีตไม่ได้');
+}
+// อ่านการ์ดสรุปจากชีต: แถวแรกของข้อมูล (หมวดแรก) — ได้รับจัดสรร = คอลัมน์ B, เบิกจ่าย = ต.ค.(คอลัมน์ C) + "เบิกจ่ายเดือนนี้" ของ พ.ย.–ก.ย.
+async function refreshExpenseSheetStats(){
+  const note = document.getElementById('gsStatNote');
+  const set = (id, txt, color)=>{ const el=document.getElementById(id); if(el){ el.textContent = txt; if(color) el.style.color = color; } };
+  if(note) note.textContent = 'กำลังอ่านข้อมูลสรุปจากชีต...';
+  try{
+    const grid = await gsFetchCsv();
+    const label = String(EXPENSE_CATS[0].label).replace(/\s+/g,' ').trim();
+    const r = grid.findIndex(row=> String(row[0]||'').replace(/\s+/g,' ').trim() === label);
+    if(r<0) throw new Error(`ไม่พบแถว "${label}" ในคอลัมน์ A ของชีต`);
+    const row = grid[r];
+    const plan = gsNum(row[1]);
+    let col = 2, disbursed = 0;
+    EXPENSE_FISCAL_MONTHS.forEach((m, mi)=>{
+      disbursed += gsNum(row[col]);            // ต.ค. = เบิกจ่ายสะสม (คอลัมน์เดียว) / เดือนอื่น = เบิกจ่ายเดือนนี้
+      col += (mi===0 ? 1 : 2);
+      if(EXPENSE_QUARTER_AT[mi]) col += 1;
+    });
+    const pct = plan>0 ? disbursed/plan*100 : 0, remaining = plan - disbursed;
+    set('gsStatPlan', fmtNum(plan));
+    set('gsStatActual', fmtNum(disbursed));
+    set('gsStatPct', pct.toFixed(2)+'%');
+    set('gsStatRemaining', fmtNum(remaining), remaining<0 ? 'var(--red)' : 'var(--green)');
+    if(note) note.textContent = 'อ่านจากชีตเมื่อ ' + new Date().toLocaleTimeString('th-TH');
+  }catch(e){
+    console.error(e);
+    ['gsStatPlan','gsStatActual','gsStatPct','gsStatRemaining'].forEach(id=>set(id,'-'));
+    if(note) note.textContent = 'อ่านข้อมูลสรุปจากชีตไม่ได้: ' + (e && e.message ? e.message : e) + ' (ตรวจว่าแชร์ชีตเป็น "ทุกคนที่มีลิงก์ดูได้" และเค้าโครงตรงกับเทมเพลต)';
+  }
+}
+// ---------- นำเข้า Excel -> Google Sheet ----------
+// อ่านไฟล์ .xlsx (รูปแบบเดียวกับไฟล์ส่งออก/เทมเพลต: หัวตารางแถว 4-5, ข้อมูลเริ่มแถว 6, คอลัมน์ A..AC)
+// แล้วส่งค่า (ไม่รวมสูตร/สี) ไปเขียนทับบล็อกข้อมูลของชีตตั้งแต่แถว 6
+const GS_DATA_START_ROW = 6;
+function gsExtractExpenseRows(ws){
+  const nCols = 3 + 11*2 + 4; // A..AC
+  const val = (cell)=>{
+    let v = cell.value;
+    if(v && typeof v === 'object'){
+      if('result' in v) v = v.result;
+      else if(v.richText) v = v.richText.map(t=>t.text).join('');
+      else if(v instanceof Date) v = v.toISOString().slice(0,10);
+      else v = '';
+    }
+    return (v===null || v===undefined) ? '' : v;
+  };
+  const out = [];
+  for(let r=GS_DATA_START_ROW; r<=ws.rowCount; r++){
+    const row = ws.getRow(r); const line = [];
+    for(let c=1;c<=nCols;c++){
+      let v = val(row.getCell(c));
+      if(c===1) v = String(v).replace(/\s+/g,' ').trim();
+      else if(typeof v === 'string' && v.trim()!==''){ const n = Number(v.replace(/,/g,'')); v = isNaN(n) ? v : n; }
+      line.push(v);
+    }
+    out.push(line);
+  }
+  while(out.length && out[out.length-1].every(x=> x==='')) out.pop();
+  return out;
+}
+function gsToTsv(values){
+  const esc = (x)=>{ const s = String(x ?? ''); return /[\t\n\r"]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  return values.map(r=> r.map(esc).join('\t')).join('\n');
+}
+async function importExpenseFileToSheet(file){
+  if(blockIfLocked()) return;
+  if(typeof ExcelJS === 'undefined'){ showToast('ไม่สามารถโหลดไลบรารี Excel ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต'); return; }
+  showToast('กำลังอ่านไฟล์ Excel...');
+  let values, sheetUsed;
+  try{
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(await file.arrayBuffer());
+    const ws = wb.worksheets.find(s=> s.name==='รายจ่าย') || wb.worksheets.find(s=> s.name==='รวมทุกวิทยาเขต') || wb.worksheets[0];
+    if(!ws){ showToast('ไม่พบชีตข้อมูลในไฟล์'); return; }
+    sheetUsed = ws.name;
+    values = gsExtractExpenseRows(ws);
+  }catch(e){
+    console.error(e); showToast('อ่านไฟล์ Excel ไม่สำเร็จ กรุณาตรวจสอบไฟล์แล้วลองใหม่'); return;
+  }
+  if(!values.length){ showToast(`ไม่พบข้อมูลตั้งแต่แถว ${GS_DATA_START_ROW} ในชีต "${sheetUsed}" ของไฟล์`); return; }
+  const filled = values.reduce((s,r)=> s + r.slice(1).filter(x=> x!=='' ).length, 0);
+
+  // ไม่มี Apps Script: คัดลอกเป็นข้อความคั่นด้วยแท็บ ให้ผู้ใช้วางในชีตเอง
+  if(!EXPENSE_GSHEET.scriptUrl){
+    try{
+      await navigator.clipboard.writeText(gsToTsv(values));
+      showToast(`คัดลอกข้อมูล ${values.length} แถว (จากชีต "${sheetUsed}") แล้ว — คลิกช่อง A${GS_DATA_START_ROW} ในตารางด้านล่างแล้วกด Ctrl+V`);
+    }catch(e){
+      console.error(e);
+      showToast('คัดลอกข้อมูลไม่สำเร็จ (เบราว์เซอร์ไม่อนุญาตคลิปบอร์ด) — ตั้งค่า Apps Script ตามคู่มือเพื่อนำเข้าอัตโนมัติ');
+    }
+    return;
+  }
+
+  if(!confirm(`นำเข้า ${values.length} แถว (${filled} ช่องที่มีค่า) จากชีต "${sheetUsed}" ของไฟล์\\nระบบจะเขียนทับข้อมูลในชีตตั้งแต่แถว ${GS_DATA_START_ROW} ลงไป (เนื้อหาเดิมในช่วงนั้นถูกล้าง รวมถึงสูตรที่คุณใส่ไว้) ยืนยันหรือไม่?`)) return;
+  showToast('กำลังส่งข้อมูลเข้า Google Sheet...');
+  try{
+    const res = await fetch(EXPENSE_GSHEET.scriptUrl, {
+      method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ token: EXPENSE_GSHEET.scriptToken, gid: EXPENSE_GSHEET.gid, startRow: GS_DATA_START_ROW, values })
+    });
+    const j = await res.json();
+    if(!j.ok) throw new Error(j.error || 'สคริปต์ตอบกลับผิดพลาด');
+    showToast(`นำเข้าสำเร็จ ${j.rows} แถว — กำลังโหลดตารางใหม่`);
+    const fr = document.getElementById('gsFrame');
+    if(fr){ const u = fr.src; fr.src = 'about:blank'; setTimeout(()=>{ fr.src = u; }, 100); }
+    setTimeout(refreshExpenseSheetStats, 2500);
+  }catch(e){
+    console.error(e);
+    showToast('นำเข้าเข้าชีตไม่สำเร็จ: ' + (e && e.message ? e.message : e) + ' — ตรวจ URL/รหัสลับของ Apps Script และสิทธิ์ "ทุกคน" ของเว็บแอป');
+  }
+}
+function renderExpenseGoogleSheetPage(){
+  const content = document.getElementById('content');
+  const gid = EXPENSE_GSHEET.gid ? `&gid=${encodeURIComponent(EXPENSE_GSHEET.gid)}` : '';
+  const embedUrl = gsheetUrl(`edit?rm=minimal${gid}`);
+  content.innerHTML = `
+    <div class="page-action-bar">
+      <button class="btn btn-export" id="gsExportBtn">🖨 ส่งออก Excel</button>
+      <button class="btn btn-datasource" id="gsDataSourceBtn">🖨 ดาวน์โหลด Data Source</button>
+    </div>
+    <div class="storage-note">ตารางในหน้านี้คือ Google Sheet — แก้ไขในชีตได้เลย ระบบของ Google บันทึกให้อัตโนมัติ (ผู้แก้ไขต้องล็อกอินบัญชี Google ที่ได้รับสิทธิ์แก้ไขชีต)</div>
+    <div class="cards-row">
+      <div class="stat-card"><div class="label">งบประมาณที่ได้รับจัดสรร (บาท)</div><div class="value" id="gsStatPlan">-</div><div class="sub">ค่าจากช่อง B ของแถวมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน</div></div>
+      <div class="stat-card"><div class="label">งบประมาณที่เบิกจ่าย (บาท)</div><div class="value orange-dark" id="gsStatActual">-</div><div class="sub">รวมแถวมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน ทุกเดือน (ต.ค.–ก.ย.)</div></div>
+      <div class="stat-card"><div class="label">งบประมาณเบิกจ่ายสะสม (%)</div><div class="value orange-light" id="gsStatPct">-</div><div class="sub">งบประมาณเบิกจ่าย / งบประมาณที่ได้รับจัดสรร</div></div>
+      <div class="stat-card"><div class="label">งบประมาณคงเหลือ (บาท)</div><div class="value" id="gsStatRemaining">-</div><div class="sub">ได้รับจัดสรร − เบิกจ่ายแล้ว</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h3>เพิ่ม/แก้ไขข้อมูล — Google Sheet (แผน-ผลการเบิกจ่ายงบประมาณแผ่นดิน)</h3>
+        <div class="head-actions">
+          <button class="btn btn-add-row" id="gsOpenBtn">↗ เปิดชีตในแท็บใหม่</button>
+          <button class="btn btn-import" id="gsImportBtn">📥 นำเข้าข้อมูล Excel</button>
+          <input type="file" id="gsImportFileInput" accept=".xlsx,.xls" style="display:none">
+          <button class="btn btn-cancel" id="gsRefreshBtn">🔄 รีเฟรชข้อมูลสรุป</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="grid-hint" id="gsStatNote"></div>
+        <iframe id="gsFrame" src="${embedUrl}" title="Google Sheet รายจ่าย" style="width:100%;height:78vh;min-height:520px;border:1px solid var(--border);border-radius:10px;background:#fff;" allow="clipboard-read; clipboard-write"></iframe>
+      </div>
+    </div>`;
+  const open = (url)=> window.open(url, '_blank', 'noopener');
+  const gidQ = EXPENSE_GSHEET.gid ? `&gid=${encodeURIComponent(EXPENSE_GSHEET.gid)}` : '';
+  document.getElementById('gsExportBtn').addEventListener('click', ()=>{ open(gsheetUrl('export?format=xlsx')); showToast('กำลังดาวน์โหลดไฟล์ Excel จาก Google Sheet (ทุกแท็บ)'); });
+  document.getElementById('gsDataSourceBtn').addEventListener('click', ()=>{ open(gsheetUrl(`export?format=csv${gidQ}`)); showToast('กำลังดาวน์โหลด Data Source (CSV) จาก Google Sheet'); });
+  document.getElementById('gsOpenBtn').addEventListener('click', ()=> open(gsheetUrl(`edit${EXPENSE_GSHEET.gid ? '#gid='+encodeURIComponent(EXPENSE_GSHEET.gid) : ''}`)));
+  document.getElementById('gsImportBtn').addEventListener('click', ()=>{
+    if(blockIfLocked()) return;
+    document.getElementById('gsImportFileInput').click();
+  });
+  document.getElementById('gsImportFileInput').addEventListener('change', e=>{
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if(f) importExpenseFileToSheet(f);
+  });
+  document.getElementById('gsRefreshBtn').addEventListener('click', refreshExpenseSheetStats);
+  refreshExpenseSheetStats();
+}
+
 function renderExpensePage(){
+  __gridDirty = false; // วาดตารางใหม่จากข้อมูลที่บันทึกแล้ว = ไม่มีตัวเลขค้างที่ยังไม่บันทึก
   activePage = 'expense';
   document.getElementById('pageTitle').textContent = MODULES.expense.title;
   document.getElementById('pageDesc').textContent = MODULES.expense.desc;
+  if(USE_GOOGLE_SHEET) return renderExpenseGoogleSheetPage();
   const rows = cache.expense;
   const content = document.getElementById('content');
 
-  // "งบประมาณที่ได้รับจัดสรร (บาท)" ให้เอาเฉพาะค่าในช่อง "มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน" (แถวแรก/C1)
-  // ของแต่ละวิทยาเขต/ปีงบประมาณมารวมกันเท่านั้น ไม่เอาค่าจากหัวข้อย่อยอื่น ๆ มารวมด้วย (กันนับซ้ำ เพราะ C1 เป็นยอดรวมอยู่แล้ว)
-  const sumPlan = rows.filter(r=>r.catIndex===0).reduce((a,r)=>a+(Number(r.plan)||0),0);
-  // "งบประมาณที่เบิกจ่าย (บาท)" ให้เอาเฉพาะค่าในแถว "มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน" (แถวแรก/C1) เช่นเดียวกับแผน
-  // และใช้เฉพาะค่าคอลัมน์ "เบิกจ่ายเดือนนี้" ของแต่ละเดือน (ไม่รวม "เบิกจ่ายสะสม")
-  const sumActual = rows.filter(r=>r.catIndex===0).reduce((a,r)=>a+Object.values(r.actual||{}).reduce((x,y)=>x+(Number(y)||0),0),0);
-  const pct = sumPlan>0 ? (sumActual/sumPlan*100) : 0;
-  const remaining = sumPlan - sumActual;
+  const sumPlan = getExpenseAllocatedC1(); // ใช้เฉพาะช่อง C1
+  // [ปรับตามคำขอ] ช่อง "เบิกจ่ายเดือนนี้" เป็นช่องกรอกเองเหมือน "เบิกจ่ายสะสม" — ยังไม่ผูกกับสถิติ (รอกำหนดสูตรสถิติใหม่)
+  const sumActual = 0;
+  const sumDisbursed = getExpenseDisbursedRow1(); // การ์ด "งบประมาณที่เบิกจ่าย" = รวมแถวที่ 1 ทุกเดือน
+  const pct = sumPlan>0 ? (sumDisbursed/sumPlan*100) : 0; // เบิกจ่ายสะสม % = เบิกจ่าย ÷ ได้รับจัดสรร × 100
+  const remaining = sumPlan - sumDisbursed; // คงเหลือ = ได้รับจัดสรร − เบิกจ่าย
   const statsHtml = `
     <div class="cards-row">
-      <div class="stat-card"><div class="label">งบประมาณที่ได้รับจัดสรร (บาท)</div><div class="value" id="expStatPlan" style="color:#1565C0 !important">${fmtNum(sumPlan)}</div></div>
-      <div class="stat-card"><div class="label">งบประมาณที่เบิกจ่าย (บาท)</div><div class="value" id="expStatActual" style="color:#E8610C !important">${fmtNum(sumActual)}</div></div>
-      <div class="stat-card"><div class="label">งบประมาณเบิกจ่ายสะสม (%)</div><div class="value" id="expStatPct" style="color:#FB8C00 !important">${pct.toFixed(2)}%</div></div>
-      <div class="stat-card"><div class="label">งบประมาณคงเหลือ (บาท)</div><div class="value" id="expStatRemaining" style="color:#2E7D32 !important">${fmtNum(remaining)}</div></div>
+      <div class="stat-card"><div class="label">งบประมาณที่ได้รับจัดสรร (บาท)</div><div class="value" id="expStatPlan">${fmtNum(sumPlan)}</div><div class="sub">ค่าจากช่อง C1 (มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน)</div></div>
+      <div class="stat-card"><div class="label">งบประมาณที่เบิกจ่าย (บาท)</div><div class="value orange-dark" id="expStatActual">${fmtNum(sumDisbursed)}</div><div class="sub">รวมแถวมหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน ทุกเดือน (ต.ค.–ก.ย.)</div></div>
+      <div class="stat-card"><div class="label">งบประมาณเบิกจ่ายสะสม (%)</div><div class="value orange-light" id="expStatPct">${pct.toFixed(2)}%</div><div class="sub">งบประมาณเบิกจ่าย / งบประมาณที่ได้รับจัดสรร</div></div>
+      <div class="stat-card"><div class="label">งบประมาณคงเหลือ (บาท)</div><div class="value" id="expStatRemaining" style="color:${remaining<0?'var(--red)':'var(--green)'}">${fmtNum(remaining)}</div><div class="sub">ได้รับจัดสรร − เบิกจ่ายแล้ว</div></div>
     </div>`;
 
   const years = [...new Set(rows.map(r=>r.year))].sort((a,b)=>b-a);
 
   content.innerHTML = `
+    <div class="page-action-bar">
+      <button class="btn btn-export" id="egExportBtn">🖨 ส่งออก Excel</button>
+      <button class="btn btn-datasource" id="egDataSourceBtn">🖨 ดาวน์โหลด Data Source</button>
+    </div>
     <div class="storage-note">ข้อมูลในหน้านี้ถูกบันทึกลงหน่วยเก็บข้อมูลกลางของระบบ (shared storage) ผู้ใช้ทุกคนที่เข้าสู่ระบบจะเห็นข้อมูลชุดเดียวกันแบบเรียลไทม์ทันที โดยไม่ต้องรีเฟรชหน้า</div>
     ${statsHtml}
     <div class="panel">
@@ -5861,12 +6111,12 @@ function renderExpensePage(){
             <select id="egCampus">${CAMPUSES.map(c=>`<option value="${c}" ${c===expenseGridCampus?'selected':''}>${c}</option>`).join('')}</select>
           </div>
           <button class="btn btn-add-row" id="egAddCatBtn">➕ เพิ่มข้อมูล</button>
-          <button class="btn btn-export" id="egExportBtn">🖨 ส่งออก Excel</button>
-          <button class="btn btn-datasource" id="egDataSourceBtn">🖨 ดาวน์โหลด Data Source</button>
           <button class="btn btn-add-row" id="egAddPOBtn">📑 เพิ่ม ใบสั่งซื้อ/PO</button>
+          <button class="btn btn-import" id="egImportBtn">📥 นำเข้าข้อมูล Excel</button>
+          <input type="file" id="egImportFileInput" accept=".xlsx,.xls" style="display:none">
         </div>
         <div class="grid-hint">${expenseGridCampus==='แยกไตรมาส'
-          ? 'กรอกตัวเลขหรือสูตร (ขึ้นต้นด้วย "=") ของ "ไตรมาส 1-4" แต่ละวิทยาเขตได้โดยตรงในตารางนี้ อ้างอิงเซลล์ด้วยตัวอักษรคอลัมน์ + เลขลำดับ เช่น =D3+I3 หรือ =SUM(D3:G3) — คอลัมน์ "รวม" ของแต่ละวิทยาเขตและกลุ่ม "มทร.อีสาน" คำนวณให้อัตโนมัติ (อ้างอิงในสูตรได้) กด "บันทึกข้อมูลตาราง" เพื่อบันทึกค่าและสูตรของทุกวิทยาเขตพร้อมกัน'
+          ? 'กรอกตัวเลขหรือสูตร (ขึ้นต้นด้วย "=" เช่น =D3+E3 หรือ =SUM(I3:L3)) ของ "ไตรมาส 1-4" แต่ละวิทยาเขตได้โดยตรงในตารางนี้ — อ้างอิงเซลล์ด้วยตัวอักษรคอลัมน์ (แถวตัวอักษรเหนือหัวตาราง) + เลขในคอลัมน์ "ลำดับ" — คอลัมน์ "รวม" ของแต่ละวิทยาเขตและกลุ่ม "มทร.อีสาน" (รวมทุกวิทยาเขต) คำนวณให้อัตโนมัติ (แก้ตรงไม่ได้ แต่อ้างอิงในสูตรได้) กด "บันทึกข้อมูลตาราง" เพื่อบันทึกค่าและสูตรของทุกวิทยาเขตพร้อมกัน'
           : 'กรอกตัวเลขหรือสูตร (ขึ้นต้นด้วย "=") ได้เองในทุกช่อง — "แผนภาพรวม" (ตัวเลขเดียวทั้งปี), "เบิกจ่ายเดือนนี้", "เบิกจ่ายสะสม" และ "ไตรมาส 1-4" ของแต่ละเดือน — หัวข้อรายการทั้งหมดยึดตามไฟล์ต้นฉบับ'}</div>
         <div class="grid-table-title-wrap">
           <div class="grid-title-actions">
@@ -5918,6 +6168,16 @@ function renderExpensePage(){
   document.getElementById('egExportBtn').addEventListener('click', exportExpenseGrid);
   document.getElementById('egDataSourceBtn').addEventListener('click', ()=>exportDataSource('expense'));
   document.getElementById('egAddPOBtn').addEventListener('click', renderPOPage);
+  document.getElementById('egImportBtn').addEventListener('click', ()=>{
+    if(blockIfLocked()) return;
+    if(document.getElementById('egCampus').value === 'แยกไตรมาส'){ showToast('มุมมอง "แยกไตรมาส" ยังไม่รองรับการนำเข้า Excel — เลือกวิทยาเขตก่อน'); return; }
+    document.getElementById('egImportFileInput').click();
+  });
+  document.getElementById('egImportFileInput').addEventListener('change', e=>{
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if(f) importExpenseGridFromExcel(f);
+  });
   document.getElementById('deleteSelectedBtn').addEventListener('click', ()=>deleteSelected('expense'));
   document.getElementById('lockFormulaBtn').addEventListener('click', toggleExpenseFormulaLock);
   document.getElementById('filterYear').addEventListener('change', renderExpenseList);
@@ -5930,49 +6190,69 @@ function renderExpensePage(){
   applyEditLockUI();
   // สูตรใช้ร่วมกันทุกวิทยาเขต แต่ค่าตัวเลขต้องคำนวณสดจากข้อมูลของวิทยาเขต/ปีที่กำลังดูอยู่ขณะนี้ —
   // คำนวณใหม่ทันทีทุกครั้งที่ render ตาราง (เช่น หลังสลับวิทยาเขต/ปี) ให้ตัวเลขตรงกับข้อมูลจริงเสมอ
-  if(expenseGridCampus === 'แยกไตรมาส') recomputeExpenseSplitAll();
-  else recomputeAllExpenseFormulas();
+  recomputeAllExpenseFormulas();
 }
 
 // คำนวณการ์ดสรุปงบประมาณด้านบนของหน้ารายจ่ายแบบเรียลไทม์
 // = ยอดของทุกรายการที่บันทึกไว้แล้ว (ยกเว้นปี/วิทยาเขตที่กำลังแก้ไขอยู่ตอนนี้)
 //   + ยอดสดจากตัวเลขที่พิมพ์อยู่ในตารางกรอกข้อมูลขณะนี้ (ยังไม่กดบันทึก)
+// [ปรับตามคำขอ] "งบประมาณที่ได้รับจัดสรร (บาท)" ของหน้างบประมาณแผ่นดิน = ค่าในช่อง C1 เท่านั้น
+// (แถวที่ 1 "มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน" คอลัมน์ C "แผนภาพรวม") ไม่รวมค่าจากช่องอื่นอีกต่อไป
+// - มีตารางบนหน้าจอ: อ่านค่าสดจากช่อง C1 (รองรับกำลังพิมพ์สูตร)
+// - ยังไม่มีตาราง / มุมมอง "แยกไตรมาส": อ่านค่า C1 ที่บันทึกไว้ของปี/วิทยาเขตที่เลือก (แยกไตรมาส = รวม C1 ของทุกวิทยาเขตจริง)
+function getExpenseAllocatedC1(){
+  const el = document.getElementById('eg_p_0');
+  if(el) return liveCellNum(el);
+  const year = document.getElementById('egYear')?.value || expenseGridYear;
+  const campus = document.getElementById('egCampus')?.value || expenseGridCampus;
+  const c1 = (c)=>{
+    const rec = cache.expense.find(r=> String(r.year)===String(year) && r.campus===c && (EXPENSE_CATS[0] && r.catId ? r.catId===EXPENSE_CATS[0].id : Number(r.catIndex)===0));
+    return rec ? (Number(rec.plan)||0) : 0;
+  };
+  if(campus==='แยกไตรมาส') return CAMPUSES.filter(c=>c!=='แยกไตรมาส').reduce((a,c)=>a+c1(c),0);
+  return c1(campus);
+}
+// การ์ด "งบประมาณที่เบิกจ่าย (บาท)" = ผลรวมของแถวที่ 1 (มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน) ทุกเดือน
+// (ต.ค. เบิกจ่ายสะสม + พ.ย.–ก.ย. เบิกจ่ายเดือนนี้ = ช่อง eg_a_0_0 ถึง eg_a_0_11)
+// - มีตารางบนหน้าจอ: อ่านค่าสดจากช่อง (รองรับกำลังพิมพ์สูตร)
+// - ยังไม่มีตาราง / มุมมอง "แยกไตรมาส": ใช้ค่าที่บันทึกไว้ของแถวที่ 1 (แยกไตรมาส = รวมทุกวิทยาเขต)
+function getExpenseDisbursedRow1(){
+  if(document.getElementById('eg_a_0_0')){
+    let sum = 0;
+    EXPENSE_FISCAL_MONTHS.forEach((m,mi)=>{
+      const el = document.getElementById(`eg_a_0_${mi}`);
+      if(el) sum += liveCellNum(el);
+    });
+    return sum;
+  }
+  const year = expenseGridYear, campus = expenseGridCampus;
+  const rowSum = (c)=>{
+    const rec = cache.expense.find(r=> String(r.year)===String(year) && r.campus===c && (EXPENSE_CATS[0] && r.catId ? r.catId===EXPENSE_CATS[0].id : Number(r.catIndex)===0));
+    return rec ? Object.values(rec.actual||{}).reduce((x,y)=>x+(Number(y)||0),0) : 0;
+  };
+  if(campus==='แยกไตรมาส') return CAMPUSES.filter(c=>c!=='แยกไตรมาส').reduce((a,c)=>a+rowSum(c),0);
+  return rowSum(campus);
+}
 function computeExpenseLiveTotals(){
   const year = document.getElementById('egYear')?.value || expenseGridYear;
   const campus = document.getElementById('egCampus')?.value || expenseGridCampus;
   let sumPlan = 0, sumActual = 0;
-  cache.expense.forEach(r=>{
-    const sameScope = String(r.year)===String(year) && r.campus===campus;
-    if(sameScope) return; // แทนที่ด้วยค่าสดจากตารางด้านล่างแทน
-    if(r.catIndex===0){
-      sumPlan += Number(r.plan)||0;
-      sumActual += Object.values(r.actual||{}).reduce((x,y)=>x+(Number(y)||0),0);
-    }
-  });
-  // ค่าสดจากตารางที่กำลังกรอกอยู่ตอนนี้ — เอาเฉพาะแถวแรก (C1 / มหาวิทยาลัยเทคโนโลยีราชมงคลอีสาน) ทั้งแผนและเบิกจ่ายเดือนนี้ ไม่รวมแถวอื่น
-  const livePlanEl = document.getElementById('eg_p_0');
-  if(livePlanEl) sumPlan += liveCellNum(livePlanEl);
-  for(let mi=0; mi<EXPENSE_FISCAL_MONTHS.length; mi++){
-    const el = document.getElementById('eg_a_0_'+mi);
-    if(el) sumActual += liveCellNum(el);
-  }
+  sumPlan = getExpenseAllocatedC1(); // ใช้เฉพาะช่อง C1
+  // [ปรับตามคำขอ] ไม่รวมช่อง "เบิกจ่ายเดือนนี้" เข้าสถิติ (sumActual คงเป็น 0) จนกว่าจะกำหนดสูตรสถิติใหม่
   return {sumPlan, sumActual};
 }
 function recalcExpenseStats(){
   const {sumPlan, sumActual} = computeExpenseLiveTotals();
-  const pct = sumPlan>0 ? (sumActual/sumPlan*100) : 0;
-  const remaining = sumPlan - sumActual;
+  const pct = sumPlan>0 ? (getExpenseDisbursedRow1()/sumPlan*100) : 0; // เบิกจ่าย ÷ ได้รับจัดสรร × 100
+  const remaining = sumPlan - getExpenseDisbursedRow1(); // คงเหลือ = ได้รับจัดสรร − เบิกจ่าย
   const elP = document.getElementById('expStatPlan');
   const elA = document.getElementById('expStatActual');
   const elPct = document.getElementById('expStatPct');
   const elR = document.getElementById('expStatRemaining');
   if(elP) elP.textContent = fmtNum(sumPlan);
-  if(elA) elA.textContent = fmtNum(sumActual);
+  if(elA) elA.textContent = fmtNum(getExpenseDisbursedRow1()); // เฉพาะการ์ดนี้ (ยังไม่ผูกกับ % และงบคงเหลือ)
   if(elPct) elPct.textContent = pct.toFixed(2)+'%';
-  if(elR){ elR.textContent = fmtNum(remaining); elR.style.setProperty('color', remaining<0 ? '#C62828' : '#2E7D32', 'important'); }
-  if(elA) elA.style.setProperty('color', '#E8610C', 'important');
-  if(elPct) elPct.style.setProperty('color', '#FB8C00', 'important');
-  if(elP) elP.style.setProperty('color', '#1565C0', 'important');
+  if(elR){ elR.textContent = fmtNum(remaining); elR.style.color = remaining<0 ? 'var(--red)' : 'var(--green)'; }
 }
 
 // ---------- render page ----------
@@ -6157,10 +6437,10 @@ function renderPage(page){
       const remaining = sumPlan - sumActual;
       statsHtml = `
         <div class="cards-row">
-          <div class="stat-card"><div class="label">งบประมาณที่ได้รับจัดสรร (บาท)</div><div class="value" style="color:#1565C0 !important">${fmtNum(sumPlan)}</div></div>
-          <div class="stat-card"><div class="label">งบประมาณที่เบิกจ่าย (บาท)</div><div class="value" style="color:#E8610C !important">${fmtNum(sumActual)}</div></div>
-          <div class="stat-card"><div class="label">งบประมาณเบิกจ่ายสะสม (%)</div><div class="value" style="color:#FB8C00 !important">${pct.toFixed(2)}%</div></div>
-          <div class="stat-card"><div class="label">งบประมาณคงเหลือ (บาท)</div><div class="value" style="color:#2E7D32 !important">${fmtNum(remaining)}</div></div>
+          <div class="stat-card"><div class="label">งบประมาณที่ได้รับจัดสรร (บาท)</div><div class="value">${fmtNum(sumPlan)}</div><div class="sub">รวมทุกรายการ</div></div>
+          <div class="stat-card"><div class="label">งบประมาณที่เบิกจ่าย (บาท)</div><div class="value green">${fmtNum(sumActual)}</div><div class="sub">รวมทุกรายการ</div></div>
+          <div class="stat-card"><div class="label">งบประมาณเบิกจ่ายสะสม (%)</div><div class="value">${pct.toFixed(2)}%</div><div class="sub">งบประมาณเบิกจ่าย / งบประมาณที่ได้รับจัดสรร</div></div>
+          <div class="stat-card"><div class="label">งบประมาณคงเหลือ (บาท)</div><div class="value" style="color:${remaining<0?'var(--red)':'var(--brown)'}">${fmtNum(remaining)}</div><div class="sub">ได้รับจัดสรร − เบิกจ่ายแล้ว</div></div>
         </div>`;
     }else{
       statsHtml = `
@@ -7967,24 +8247,37 @@ function buildExpenseGridWorkbook(wb, rows, totals, year){
       if(cat.scopeCampus && cat.scopeCampus!==g.name && g.name!=='รวมทุกวิทยาเขต') return;
       // g.rows ถูกกรองมาให้เหลือเฉพาะแถวของ "ปีงบประมาณนี้" ปีเดียวแล้ว (ดู exportExpenseGrid ที่แยกไฟล์ต่อปี)
       // จึงหา rec ด้วย catIndex ได้โดยไม่ปนปีอื่น
-      // ชีท "รวมทุกวิทยาเขต" = ผลรวมของ 4 วิทยาเขตจริง (นครราชสีมา สุรินทร์ ขอนแก่น สกลนคร) ทุกช่องตัวเลข
-      // (แผนภาพรวม / เบิกจ่ายรายเดือน / เบิกจ่ายสะสม / ไตรมาส) — เดิมหยิบข้อมูลของวิทยาเขตแรกที่เจอเพียงวิทยาเขตเดียว
-      // ชีทรายวิทยาเขตยังคงใช้ข้อมูลของวิทยาเขตนั้นอย่างเดียวเหมือนเดิม
-      const isAllSheet = g.name==='รวมทุกวิทยาเขต';
-      const recs = isAllSheet
-        ? REAL_CAMPUSES.map(c=> g.rows.find(r=>r.catIndex===ci && r.campus===c)).filter(Boolean)
-        : [g.rows.find(r=>r.catIndex===ci)].filter(Boolean);
-      const plan = recs.reduce((a,r)=> a + (Number(r.plan)||0), 0);
+      // [แก้ชีท "รวมทุกวิทยาเขต"] เดิมใช้ find() ได้แค่ระเบียนแรกที่พบ (วิทยาเขตเดียว) ไม่ได้บวกรวม
+      // ตอนนี้ชีทรวมจะบวก นครราชสีมา + สุรินทร์ + ขอนแก่น + สกลนคร ของหัวข้อเดียวกันเข้าด้วยกัน
+      // (แผนภาพรวม / เบิกจ่ายรายเดือน / เบิกจ่ายสะสม / ไตรมาส) ส่วนชีทรายวิทยาเขตยังใช้ค่าของวิทยาเขตนั้นตามเดิม
+      const isAllSheet = (g.name==='รวมทุกวิทยาเขต');
+      const REAL_CAMPUS_LIST = CAMPUSES.filter(c=>c!=='แยกไตรมาส');
+      const catRecs = isAllSheet
+        ? g.rows.filter(r=> r.catIndex===ci && REAL_CAMPUS_LIST.includes(r.campus))
+        : (()=>{ const one = g.rows.find(r=>r.catIndex===ci); return one ? [one] : []; })();
+      const rec = catRecs.length ? { plan: catRecs.reduce((s,r)=>s+(Number(r.plan)||0),0),
+        actual: EXPENSE_FISCAL_MONTHS.reduce((o,m)=>{ o[m] = catRecs.reduce((s,r)=>s+(Number(r.actual && r.actual[m])||0),0); return o; }, {}) } : null;
+      const plan = rec ? Number(rec.plan)||0 : 0;
       // สูตรของช่อง "เบิกจ่ายสะสม/ไตรมาส" ที่ผู้ใช้เคยพิมพ์ไว้ในตารางกรอกข้อมูล ผูกกับรหัสหมวดหมู่นี้เท่านั้น
       // (ใช้ร่วมกันทุกวิทยาเขตและทุกปีงบประมาณ — ไม่ผูกกับปี จึงขึ้นเหมือนกันไม่ว่าจะส่งออกปีไหน)
       const formulaShared = cache.expenseFormulaShared.find(f=> f.catId===cat.id);
-      const cellOverrides = (isAllSheet ? REAL_CAMPUSES : [g.name])
-        .map(c=> totals.find(t=> String(t.year)===String(yearLabel) && t.campus===c && t.catId===cat.id))
-        .filter(Boolean);
+      let cellOverride;
+      if(isAllSheet){
+        // บวกค่า "เบิกจ่ายสะสม" / "ไตรมาส" ที่กรอกเป็นตัวเลขของทั้ง 4 วิทยาเขต (ช่องที่เป็นสูตรใช้สูตรร่วมกันซึ่งคำนวณจากชีทนี้เอง)
+        const ovs = totals.filter(t=> String(t.year)===String(yearLabel) && REAL_CAMPUS_LIST.includes(t.campus) && t.catId===cat.id);
+        const sumMap = (key)=>{
+          const out = {}; let has = false;
+          ovs.forEach(o=>{ if(o[key]) Object.keys(o[key]).forEach(k=>{ out[k] = (out[k]||0) + (Number(o[key][k])||0); has = true; }); });
+          return has ? out : undefined;
+        };
+        cellOverride = { cumManual: sumMap('cumManual'), qManual: sumMap('qManual') };
+      }else{
+        cellOverride = totals.find(t=> String(t.year)===String(yearLabel) && t.campus===g.name && t.catId===cat.id);
+      }
       xDataCell(ws, row, 1, '  '.repeat(cat.level) + cat.label, {bold:cat.level===0});
       xDataCell(ws, row, 2, plan, {num:true, bold:cat.level===0});
       EXPENSE_FISCAL_MONTHS.forEach((m, mi)=>{
-        const v = recs.reduce((a,r)=> a + (r.actual ? (Number(r.actual[m])||0) : 0), 0);
+        const v = rec && rec.actual ? Number(rec.actual[m])||0 : 0;
         const c0 = monthCol0[mi];
         if(mi===0){
           // ต.ค. มีคอลัมน์เดียว ทำหน้าที่เป็นทั้งยอดเดือนและยอดสะสม (สะสมเดือนแรก = ยอดเดือนนั้นเอง)
@@ -7993,7 +8286,8 @@ function buildExpenseGridWorkbook(wb, rows, totals, year){
           xDataCell(ws, row, c0, v, {num:true});
           // "เบิกจ่ายสะสม" เป็นช่องเปล่าให้ผู้ใช้กรอกเอง — ใช้ค่า/สูตรที่เคยกรอกไว้ในตารางกรอกข้อมูล (ถ้ามี)
           const cumFormula = formulaShared && formulaShared.cumFormula && formulaShared.cumFormula[m];
-          const cumVal = cellOverrides.reduce((a,o)=> a + (o.cumManual ? (Number(o.cumManual[m])||0) : 0), 0);
+          const cumManual = cellOverride && cellOverride.cumManual && cellOverride.cumManual[m];
+          const cumVal = cumManual!==undefined ? (Number(cumManual)||0) : 0;
           xValueOrUserFormulaCell(ws, row, c0+1, cumVal, cumFormula, {});
         }
         if(EXPENSE_QUARTER_AT[mi]){
@@ -8001,7 +8295,8 @@ function buildExpenseGridWorkbook(wb, rows, totals, year){
           const qCol = (mi===0? c0+1 : monthCol0[mi]+2);
           // "ไตรมาส N" เป็นช่องเปล่าให้ผู้ใช้กรอกเอง — ใช้ค่า/สูตรที่เคยกรอกไว้ในตารางกรอกข้อมูล (ถ้ามี)
           const qFormula = formulaShared && formulaShared.qFormula && formulaShared.qFormula[qn];
-          const qVal = cellOverrides.reduce((a,o)=> a + (o.qManual ? (Number(o.qManual[qn])||0) : 0), 0);
+          const qManual = cellOverride && cellOverride.qManual && cellOverride.qManual[qn];
+          const qVal = qManual!==undefined ? (Number(qManual)||0) : 0;
           xValueOrUserFormulaCell(ws, row, qCol, qVal, qFormula, {bold:true, fill:TOTAL_FILL});
         }
       });
@@ -8012,6 +8307,158 @@ function buildExpenseGridWorkbook(wb, rows, totals, year){
     for(let c=2;c<=totalCols;c++) ws.getColumn(c).width = 14;
     ws.views = [{state:'frozen', xSplit:1, ySplit:5}];
   });
+
+  // ---------- ชีท "แยกไตรมาส" (ตรงกับตาราง "แยกไตรมาส" บนหน้าเว็บ) ----------
+  // คอลัมน์: A=ประเภทรายจ่าย, B=แผนภาพรวม, จากนั้นกลุ่มละ 5 คอลัมน์ (ไตรมาส 1-4 + รวม)
+  // กลุ่ม: มทร.อีสาน (รวมทุกวิทยาเขต), นครราชสีมา, สุรินทร์, ขอนแก่น, สกลนคร
+  // พิกัดสอดคล้องกับ translateGridFormulaToExcel (ไม่มีคอลัมน์ลำดับ, แถวข้อมูลเริ่มที่แถว 6) สูตรที่ผู้ใช้พิมพ์ไว้ (qsFormula) จึงใช้ได้ตรงกัน
+  {
+    const REAL_QS = CAMPUSES.filter(c=>c!=='แยกไตรมาส');
+    const wsq = wb.addWorksheet('แยกไตรมาส');
+    const nGroups = EXPENSE_QUARTER_SPLIT_GROUPS.length;
+    const totalColsQ = 2 + nGroups*5;
+    xTitleCell(wsq, 1, totalColsQ, EXPENSE_REPORT_TITLE(yearLabel), 16);
+    xTitleCell(wsq, 2, totalColsQ, `${UNIV_NAME} (แยกไตรมาส)`, 14);
+    wsq.mergeCells(4,1,5,1); xHeaderCell(wsq,4,1,'ประเภทรายจ่าย');
+    wsq.mergeCells(4,2,5,2); xHeaderCell(wsq,4,2,'แผนภาพรวม');
+    EXPENSE_QUARTER_SPLIT_GROUPS.forEach((g, gi)=>{
+      const c0 = 3 + gi*5;
+      wsq.mergeCells(4,c0,4,c0+4);
+      xHeaderCell(wsq,4,c0,g.label);
+      for(let k=1;k<=4;k++) xHeaderCell(wsq,5,c0+k-1,`ไตรมาส ${k}`);
+      xHeaderCell(wsq,5,c0+4,'รวม');
+    });
+
+    let qrow = 6;
+    EXPENSE_CATS.forEach((cat, ci)=>{
+      const formulaShared = cache.expenseFormulaShared.find(f=> f.catId===cat.id);
+      // ข้อมูลของแต่ละวิทยาเขตจริง
+      const perCampus = {};
+      let planTotal = 0;
+      REAL_QS.forEach(campus=>{
+        const rec = rows.find(r=> r.campus===campus && r.catIndex===ci);
+        const ov = totals.find(t=> String(t.year)===String(yearLabel) && t.campus===campus && t.catId===cat.id);
+        planTotal += Number(rec && rec.plan) || 0;
+        perCampus[campus] = [1,2,3,4].map(qn=> Number(ov && ov.qManual && ov.qManual[qn]) || 0);
+      });
+      const totalQ = [0,1,2,3].map(i=> REAL_QS.reduce((sum,c)=> sum + perCampus[c][i], 0));
+
+      xDataCell(wsq, qrow, 1, '  '.repeat(cat.level) + cat.label, {bold:cat.level===0});
+      xDataCell(wsq, qrow, 2, planTotal, {num:true, bold:cat.level===0});
+
+      EXPENSE_QUARTER_SPLIT_GROUPS.forEach((g, gi)=>{
+        const c0 = 3 + gi*5;
+        if(g.campus){
+          const cIdx = REAL_QS.indexOf(g.campus);
+          const skip = cat.scopeCampus && cat.scopeCampus!==g.campus;
+          const campusFormulas = formulaShared && formulaShared.qsFormula && formulaShared.qsFormula[g.campus];
+          [1,2,3,4].forEach(qn=>{
+            const f = (!skip && campusFormulas) ? campusFormulas[qn] : undefined;
+            xValueOrUserFormulaCell(wsq, qrow, c0+qn-1, skip ? 0 : perCampus[g.campus][qn-1], f, {});
+          });
+          xSumCell(wsq, qrow, c0+4, `${xRef(qrow,c0)}:${xRef(qrow,c0+3)}`, {bold:true, fill:TOTAL_FILL, result: perCampus[g.campus].reduce((a,b)=>a+b,0)});
+        }else{
+          // กลุ่ม "มทร.อีสาน" = ผลรวมของ 4 วิทยาเขตในไตรมาสเดียวกัน
+          for(let qi=0; qi<4; qi++){
+            const refs = REAL_QS.map((c,idx)=> xRef(qrow, 3 + (idx+1)*5 + qi));
+            xSumCell(wsq, qrow, c0+qi, refs, {result: totalQ[qi]});
+          }
+          xSumCell(wsq, qrow, c0+4, `${xRef(qrow,c0)}:${xRef(qrow,c0+3)}`, {bold:true, fill:TOTAL_FILL, result: totalQ.reduce((a,b)=>a+b,0)});
+        }
+      });
+      qrow++;
+    });
+
+    wsq.getColumn(1).width = 42;
+    for(let c=2;c<=totalColsQ;c++) wsq.getColumn(c).width = 14;
+    wsq.views = [{state:'frozen', xSplit:1, ySplit:5}];
+  }
+}
+
+// นำเข้าไฟล์ Excel (รูปแบบเดียวกับที่ปุ่ม "ส่งออก Excel" สร้าง) เข้าตารางรายจ่ายของ ปีงบฯ/วิทยาเขต ที่เลือกอยู่
+// - เลือกชีทที่ชื่อตรงกับวิทยาเขตที่เลือก (ถ้าไฟล์มีชีทเดียวใช้ชีทนั้น)
+// - จับคู่แถวด้วยชื่อ "ประเภทรายจ่าย" (สำรอง: ตามลำดับแถว) เริ่มอ่านที่แถว 6 ตามรูปแบบไฟล์ส่งออก
+// - เติมค่าลงตารางบนหน้าจอเท่านั้น ยังไม่บันทึก — ข้ามช่องที่มีสูตร/ถูกล็อค แล้วให้ผู้ใช้ตรวจแล้วกด "บันทึกข้อมูลตาราง"
+async function importExpenseGridFromExcel(file){
+  if(blockIfLocked()) return;
+  const campus = document.getElementById('egCampus').value;
+  if(campus === 'แยกไตรมาส'){ showToast('มุมมอง "แยกไตรมาส" ยังไม่รองรับการนำเข้า Excel'); return; }
+  if(typeof ExcelJS === 'undefined'){
+    showToast('ไม่สามารถโหลดไลบรารี Excel ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+    return;
+  }
+  showToast('กำลังอ่านไฟล์ Excel...');
+  try{
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(await file.arrayBuffer());
+    let ws = wb.worksheets.find(s=> s.name === campus.substring(0,31));
+    if(!ws && wb.worksheets.length===1) ws = wb.worksheets[0];
+    if(!ws){ showToast(`ไม่พบชีท "${campus}" ในไฟล์ที่เลือก`); return; }
+
+    const cellNum = (r, c)=>{
+      let v = ws.getRow(r).getCell(c).value;
+      if(v && typeof v === 'object'){
+        if('result' in v) v = v.result;
+        else if(v.richText) v = v.richText.map(t=>t.text).join('');
+        else return null;
+      }
+      if(v===null || v===undefined || String(v).trim()==='') return null;
+      const n = Number(String(v).replace(/,/g,''));
+      return isNaN(n) ? null : n;
+    };
+    const cellText = (r)=>{
+      let v = ws.getRow(r).getCell(1).value;
+      if(v && typeof v === 'object') v = v.richText ? v.richText.map(t=>t.text).join('') : (v.result ?? '');
+      return String(v ?? '').replace(/\s+/g,' ').trim();
+    };
+
+    // ตำแหน่งคอลัมน์ให้ตรงกับไฟล์ส่งออก: A=ประเภท, B=แผนภาพรวม, ต.ค.=1 คอลัมน์, เดือนอื่น=2 คอลัมน์, ต่อท้ายเดือนที่ปิดไตรมาส = 1 คอลัมน์
+    const cols = []; let col = 3;
+    EXPENSE_FISCAL_MONTHS.forEach((m, mi)=>{
+      const o = {};
+      if(mi===0){ o.actual = col; col += 1; }
+      else { o.actual = col; o.cum = col+1; col += 2; }
+      if(EXPENSE_QUARTER_AT[mi]){ o.q = col; o.qn = EXPENSE_QUARTER_AT[mi]; col += 1; }
+      cols.push(o);
+    });
+
+    const lastRow = Math.max(ws.rowCount, 6);
+    const sheetLabels = [];
+    for(let r=6; r<=lastRow; r++) sheetLabels.push({r, label: cellText(r), used:false});
+
+    let filled = 0, skippedFormula = 0, matchedRows = 0, order = 0;
+    const setCell = (id, val)=>{
+      if(val===null) return;
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(el.dataset.formula || el.readOnly){ skippedFormula++; return; }
+      el.value = val;
+      filled++;
+    };
+    EXPENSE_CATS.forEach((cat, ci)=>{
+      if(cat.scopeCampus && cat.scopeCampus!==campus) return;
+      const want = String(cat.label).replace(/\s+/g,' ').trim();
+      let hit = sheetLabels.find(x=> !x.used && x.label===want);
+      if(!hit){ const fb = sheetLabels[order]; if(fb && !fb.used && fb.label==='' ) hit = null; else if(fb && !fb.used) hit = fb; }
+      order++;
+      if(!hit) return;
+      hit.used = true; matchedRows++;
+      const r = hit.r;
+      setCell(`eg_p_${ci}`, cellNum(r, 2));
+      cols.forEach((o, mi)=>{
+        setCell(`eg_a_${ci}_${mi}`, cellNum(r, o.actual));
+        if(o.cum) setCell(`eg_c_${ci}_${mi}`, cellNum(r, o.cum));
+        if(o.q) setCell(`eg_q_${ci}_${o.qn}`, cellNum(r, o.q));
+      });
+    });
+
+    recomputeAllExpenseFormulas();
+    if(filled===0){ showToast('ไม่พบตัวเลขที่นำเข้าได้ — ตรวจสอบว่าเป็นไฟล์จากปุ่ม "ส่งออก Excel" (ข้อมูลเริ่มที่แถว 6)'); return; }
+    showToast(`นำเข้า ${filled} ช่อง จาก ${matchedRows} แถว${skippedFormula?` (ข้าม ${skippedFormula} ช่องที่มีสูตร)`:''} — ตรวจสอบแล้วกด "บันทึกข้อมูลตาราง"`);
+  }catch(e){
+    console.error(e);
+    showToast('อ่านไฟล์ Excel ไม่สำเร็จ กรุณาตรวจสอบไฟล์แล้วลองใหม่');
+  }
 }
 
 async function exportExpenseGrid(){
